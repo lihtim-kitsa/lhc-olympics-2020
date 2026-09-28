@@ -1,0 +1,13 @@
+model:
+  name: M5_Supervised
+data:
+  f_train: 0.0 
+  k_labels: 1000 # uses labels
+  use_mjj: false
+training:
+  seed: 42
+  epochs: 50
+  batch_size: 256
+  learning_rate: 0.001
+mlflow:
+  experiment_name: "LHCO_Anomaly_Detection"
