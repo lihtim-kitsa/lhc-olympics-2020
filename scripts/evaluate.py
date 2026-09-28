@@ -121,6 +121,36 @@ def _evaluate_model(config):
     sbv=score(model,Xbv,name,device)
     scores=np.r_[sb,ss]
     metrics=get_core_metrics(y_test,scores)
+
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import roc_curve
+    fpr, tpr, _ = roc_curve(y_test, scores)
+    valid = fpr > 0
+    sic = np.zeros_like(tpr)
+    sic[valid] = tpr[valid] / np.sqrt(fpr[valid])
+    
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+    ax[0].plot(tpr, 1.0 / np.where(fpr > 0, fpr, np.nan), label=f'AUC={metrics["roc_auc"]:.3f}')
+    ax[0].set_yscale('log')
+    ax[0].set_xlabel('Signal Efficiency (TPR)')
+    ax[0].set_ylabel('Background Rejection (1/FPR)')
+    ax[0].set_title('ROC Curve')
+    ax[0].legend()
+    ax[0].grid(True)
+    
+    ax[1].plot(tpr, sic)
+    ax[1].set_xlabel('Signal Efficiency (TPR)')
+    ax[1].set_ylabel('Significance (SIC)')
+    ax[1].set_title('SIC Curve')
+    ax[1].grid(True)
+    
+    fig.tight_layout()
+    curve_path = os.path.join('reports', 'figures', f'{name}_{variant}_{seed}_roc_sic.png')
+    os.makedirs(os.path.dirname(curve_path), exist_ok=True)
+    fig.savefig(curve_path, dpi=160)
+    plt.close(fig)
+    mlflow.log_artifact(curve_path)
+
     metrics['n_test_background']=int(len(sb)); metrics['n_test_signal_2prong']=int(len(ss))
     metrics['test_signal_prevalence']=float(len(ss)/(len(sb)+len(ss)))
     thresholds={'10pct':threshold_at_efficiency(sbv,.10),'1pct':threshold_at_efficiency(sbv,.01)}

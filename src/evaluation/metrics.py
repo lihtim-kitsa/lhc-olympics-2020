@@ -59,9 +59,8 @@ def calculate_js_divergence(hist1, hist2):
 def evaluate_mass_sculpting(mjj_bkg, score_bkg, thresholds):
     """
     Evaluate JS divergence of mJJ background before and after cuts.
-    thresholds: dict like {'10pct': t10, '1pct': t1}
-    mjj_bkg: mjj values for background events
-    score_bkg: anomaly scores for background events
+    JSD: The Jensen-Shannon Divergence between the normalized mass distribution 
+    (mJJ) of the inclusive background and the background surviving a given anomaly score cut.
     """
     # Define bins
     bins = np.linspace(2000, 5000, 50)
@@ -86,7 +85,8 @@ def evaluate_mass_sculpting(mjj_bkg, score_bkg, thresholds):
 
 def calculate_score_mjj_dependence(mjj_bkg, score_bkg):
     """
-    Calculate Pearson correlation coefficient between anomaly score and mJJ on background.
+    score-mJJ: The Pearson correlation coefficient between the anomaly scores 
+    and the invariant mass mJJ on the background events.
     """
     if len(mjj_bkg) < 2:
         return 0.0

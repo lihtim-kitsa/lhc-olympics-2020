@@ -1,0 +1,10 @@
+model:
+  name: M0_TauCut
+data:
+  f_train: 0.0
+  k_labels: 0
+  use_mjj: false
+training:
+  seed: 42
+mlflow:
+  experiment_name: LHC_Olympics_R&D

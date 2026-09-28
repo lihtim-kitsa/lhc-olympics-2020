@@ -1,4 +1,6 @@
-"""Train one configured LHCO detector with training-only scaling and validation stopping."""
+"""Train one configured LHCO detector with training-only scaling and validation stopping.
+f_train: Percentage (e.g. 0.0 to 100.0) of the background training set size to inject as signal.
+"""
 import argparse
 import os
 import hashlib
@@ -41,10 +43,15 @@ def load_data(split_dir, features_file, config):
     seed = int(config['training']['seed'])
     rng = np.random.default_rng(seed)
     model_name = config['model']['name']
+    
+    use_3p = config['data'].get('use_3prong', False)
+    sig_train_file = 'signal3_train.npy' if use_3p else 'signal2_train.npy'
+    sig_val_file = 'signal3_val.npy' if use_3p else 'signal2_val.npy'
+    
     bkg_idx = np.load(os.path.join(split_dir, 'background_train.npy'))
-    sig_idx = np.load(os.path.join(split_dir, 'signal2_train.npy'))
+    sig_idx = np.load(os.path.join(split_dir, sig_train_file))
     bkg_val_idx = np.load(os.path.join(split_dir, 'background_val.npy'))
-    sig_val_idx = np.load(os.path.join(split_dir, 'signal2_val.npy'))
+    sig_val_idx = np.load(os.path.join(split_dir, sig_val_file))
     cols = [0, 1, 2, 3, 4, 5] if data.get('use_mjj', False) else [0, 1, 2, 3, 4]
 
     if model_name == 'M5_Supervised':
@@ -114,7 +121,9 @@ def train_model(config):
         mlflow.log_param('labeled_signal_count', len(labeled_idx) if name == 'M4_DeepSAD' else int(y_u.sum()) if name == 'M5_Supervised' else 0)
         if name == 'M5_Supervised':
             # All signal training examples carry labels in the supervised reference.
-            labeled_signal_idx=np.load(os.path.join(split_dir,'signal2_train.npy'))
+            use_3p = config['data'].get('use_3prong', False)
+            sig_train_file = 'signal3_train.npy' if use_3p else 'signal2_train.npy'
+            labeled_signal_idx=np.load(os.path.join(split_dir, sig_train_file))
             injected_signal_idx=np.empty(0,dtype=np.int64)
         else:
             labeled_signal_idx=labeled_idx
@@ -127,18 +136,48 @@ def train_model(config):
         with open(os.path.join(sample_dir,f'{name}_{variant}_{seed}.json'),'w',encoding='utf-8') as f:
             json.dump({'model':name,'f_train_percent':config['data'].get('f_train',0),'k_labels':config['data'].get('k_labels',0),'seed':seed,'background_train_count':int(len(np.load(os.path.join(split_dir,'background_train.npy')))),'background_train_indices_sha256':bkg_hash,'injected_signal_count':int(len(injected_signal_idx)),'labeled_signal_count':int(len(labeled_signal_idx)),'signal_index_file':os.path.basename(sample_path)},f,indent=2)
 
+from src.models.m0_tau_cut import TauCutBaseline
+
         if name == 'M2_IsolationForest':
             model = IsolationForestAnomalyDetector(config['model'].get('n_estimators', 100), random_state=seed)
             model.fit(X_u)
             with open(model_path, 'wb') as out:
                 pickle.dump(model, out)
+        elif name == 'M0_TauCut':
+            model = TauCutBaseline()
+            with open(model_path, 'wb') as out:
+                pickle.dump(model, out)
+        elif name == 'M8_ANODE':
+            from src.models.m8_anode import ANODEBaseline
+            mjj_unscaled = scaler.inverse_transform(X_u)[:, 5]
+            model = ANODEBaseline()
+            model.fit(X_u, mjj_unscaled)
+            with open(model_path, 'wb') as out:
+                pickle.dump(model, out)
         else:
             X_train = np.concatenate([X_u, X_l])
             y_train = np.concatenate([y_u, y_l])
+            
+            if name == 'M7_CWoLa':
+                # CWoLa specific logic: redefine y_train based on mJJ regions
+                mjj_unscaled = scaler.inverse_transform(X_train)[:, 5]
+                # Signal region: 3.3 to 3.7 TeV
+                sr_mask = (mjj_unscaled >= 3300) & (mjj_unscaled <= 3700)
+                # Sidebands: 2.5-3.3 and 3.7-4.5
+                sb_mask = ((mjj_unscaled >= 2500) & (mjj_unscaled < 3300)) | ((mjj_unscaled > 3700) & (mjj_unscaled <= 4500))
+                
+                valid_mask = sr_mask | sb_mask
+                X_train = X_train[valid_mask]
+                # Label SR as 1, SB as 0
+                y_train = sr_mask[valid_mask].astype(np.float32)
+
             ds = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
             loader = DataLoader(ds, batch_size=batch, shuffle=True, generator=torch.Generator().manual_seed(seed))
             input_dim = X_train.shape[1]
-            if name == 'M1_Autoencoder': model = Autoencoder(input_dim).to(device)
+            if name == 'M7_CWoLa':
+                from src.models.m7_cwola import CWoLaClassifier
+                model = CWoLaClassifier(input_dim=5).to(device)
+            elif name == 'M1_Autoencoder': model = Autoencoder(input_dim).to(device)
             elif name in ('M3_DeepSVDD', 'M6_MassAware'): model = DeepSVDD(input_dim).to(device)
             elif name == 'M4_DeepSAD': model = DeepSAD(input_dim, eta=config['model'].get('eta', 1.0)).to(device)
             elif name == 'M5_Supervised': model = SupervisedMLP(input_dim).to(device)
@@ -149,8 +188,18 @@ def train_model(config):
                 model.init_center(center_loader, device=device)
             optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
             criterion = nn.BCEWithLogitsLoss()
-            Xv = torch.from_numpy(X_val).to(device)
-            yv = torch.from_numpy(y_val).to(device)
+            
+            if name == 'M7_CWoLa':
+                mjj_val_unscaled = scaler.inverse_transform(X_val)[:, 5]
+                sr_val = (mjj_val_unscaled >= 3300) & (mjj_val_unscaled <= 3700)
+                sb_val = ((mjj_val_unscaled >= 2500) & (mjj_val_unscaled < 3300)) | ((mjj_val_unscaled > 3700) & (mjj_val_unscaled <= 4500))
+                val_mask = sr_val | sb_val
+                Xv = torch.from_numpy(X_val[val_mask]).to(device)
+                yv = torch.from_numpy(sr_val[val_mask].astype(np.float32)).to(device)
+            else:
+                Xv = torch.from_numpy(X_val).to(device)
+                yv = torch.from_numpy(y_val).to(device)
+                
             best, best_state, patience = float('inf'), None, int(config['training'].get('patience', 8))
             stale = 0
             for epoch in range(epochs):
@@ -183,6 +232,12 @@ def train_model(config):
 
 
 if __name__ == '__main__':
-    parser=argparse.ArgumentParser(); parser.add_argument('--config',required=True)
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--config',required=True)
+    parser.add_argument('--use-3prong', action='store_true')
     args=parser.parse_args()
-    with open(args.config,encoding='utf-8') as f: train_model(yaml.safe_load(f))
+    with open(args.config,encoding='utf-8') as f: 
+        config = yaml.safe_load(f)
+    if args.use_3prong:
+        config['data']['use_3prong'] = True
+    train_model(config)

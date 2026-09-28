@@ -37,18 +37,24 @@ def run_grid():
     subprocess.run([sys.executable,'scripts/build_features.py'],check=True)
     subprocess.run([sys.executable,'src/data/make_dataset.py'],check=True)
     grid=[]
-    for model_id in ('m1_autoencoder','m2_isolation_forest','m3_deep_svdd'):
-        with open(f'configs/{model_id}.yaml',encoding='utf-8') as f: base=yaml.safe_load(f)
-        for f_train in (0.0,0.1,0.5,1.0):
-            cfg=copy.deepcopy(base); cfg['data']['f_train']=f_train; cfg['data']['k_labels']=0
-            grid.append(cfg)
-    with open('configs/m4_deep_sad.yaml',encoding='utf-8') as f: sad_base=yaml.safe_load(f)
-    for f_train in (0.0,0.5,1.0):
-        for k in (10,100,1000):
-            cfg=copy.deepcopy(sad_base); cfg['data']['f_train']=f_train; cfg['data']['k_labels']=k
-            grid.append(cfg)
-    for model_id in ('m5_supervised','m6_mass_aware'):
-        with open(f'configs/{model_id}.yaml',encoding='utf-8') as f: grid.append(yaml.safe_load(f))
+    for seed in [42, 43, 44, 45, 46]:
+        for model_id in ('m1_autoencoder','m2_isolation_forest','m3_deep_svdd'):
+            with open(f'configs/{model_id}.yaml',encoding='utf-8') as f: base=yaml.safe_load(f)
+            for f_train in (0.0,0.1,0.5,1.0):
+                cfg=copy.deepcopy(base)
+                cfg['data']['f_train']=f_train; cfg['data']['k_labels']=0; cfg['training']['seed']=seed
+                grid.append(cfg)
+        with open('configs/m4_deep_sad.yaml',encoding='utf-8') as f: sad_base=yaml.safe_load(f)
+        for f_train in (0.0,0.5,1.0):
+            for k in (10,100,1000):
+                cfg=copy.deepcopy(sad_base)
+                cfg['data']['f_train']=f_train; cfg['data']['k_labels']=k; cfg['training']['seed']=seed
+                grid.append(cfg)
+        for model_id in ('m5_supervised','m6_mass_aware'):
+            with open(f'configs/{model_id}.yaml',encoding='utf-8') as f:
+                cfg=yaml.safe_load(f)
+                cfg['training']['seed']=seed
+                grid.append(cfg)
 
     manifest=[]
     for i,cfg in enumerate(grid,1):
@@ -73,30 +79,7 @@ def run_grid():
         manifest.append(entry)
         os.makedirs('reports/tables',exist_ok=True)
         with open('reports/tables/run_manifest.json','w',encoding='utf-8') as f: json.dump(manifest,f,indent=2)
-    # Three-seed replicate sample for headline method comparisons. The full
-    # contamination/label-budget grid remains anchored to the preregistered seed.
-    repeat_specs=[('m1_autoencoder',0.0,0),('m2_isolation_forest',0.0,0),
-        ('m3_deep_svdd',0.0,0),('m4_deep_sad',0.5,100),
-        ('m5_supervised',0.0,1000),('m6_mass_aware',0.0,0)]
-    for repeat_seed in (43,44):
-        for model_id,f_train,k in repeat_specs:
-            with open(f'configs/{model_id}.yaml',encoding='utf-8') as f: cfg=yaml.safe_load(f)
-            cfg['training']['seed']=repeat_seed; cfg['data']['f_train']=f_train; cfg['data']['k_labels']=k
-            entry={'index':len(manifest)+1,'model':cfg['model']['name'],'f_train_percent':f_train,
-                'k_labels':k,'seed':repeat_seed,'replicate':'headline baseline'}
-            print(f"[{entry['index']}/35] {entry}",flush=True)
-            variant=f"f{f_train:g}_k{k}"; stem=f"{entry['model']}_{variant}_{repeat_seed}"
-            result_path='reports/tables/results.csv'
-            if os.path.exists(result_path) and os.path.exists(os.path.join('models',stem+'.pt')):
-                old=pd.read_csv(result_path)
-                found=old[(old.model==entry['model'])&(old.f_train==f_train)&(old.k_labels==k)&(old.seed==repeat_seed)]
-                if len(found): entry['status']='already completed; retained'
-                else:
-                    train_model(cfg); evaluate_model(cfg); entry['status']='completed'
-            else:
-                train_model(cfg); evaluate_model(cfg); entry['status']='completed'
-            manifest.append(entry)
-            with open('reports/tables/run_manifest.json','w',encoding='utf-8') as f: json.dump(manifest,f,indent=2)
+
     results=pd.read_csv('reports/tables/results.csv')
     baseline=results[results.seed.isin([42,43,44]) & results.model.isin([
         'M1_Autoencoder','M2_IsolationForest','M3_DeepSVDD','M4_DeepSAD','M5_Supervised','M6_MassAware'])]
