@@ -1,0 +1,12 @@
+model:
+  name: M2_IsolationForest
+  n_estimators: 100
+  contamination: auto
+data:
+  f_train: 0.0 # 0% contamination for baseline
+  k_labels: 0
+  use_mjj: false
+training:
+  seed: 42
+mlflow:
+  experiment_name: "LHCO_Anomaly_Detection"

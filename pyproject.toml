@@ -1,0 +1,32 @@
+[project]
+name = "lhco-anomaly-svdd"
+version = "1.0.0"
+description = "Unsupervised and Semi-Supervised Anomaly Detection on the LHC Olympics 2020 R&D Dataset"
+authors = [
+    {name = "Mithil Hardik Astik"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "pandas",
+    "h5py",
+    "pyyaml",
+    "torch>=2.0.0",
+    "scikit-learn",
+    "mlflow",
+    "matplotlib",
+    "seaborn",
+    "fastjet",
+    "awkward",
+    "tqdm",
+    "requests"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "flake8",
+    "mypy"
+]
