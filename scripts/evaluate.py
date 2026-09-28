@@ -139,6 +139,10 @@ def evaluate_model(config):
         sculpting_metrics = evaluate_mass_sculpting(mjj_bkg, scores_bkg, thresholds)
         metrics.update(sculpting_metrics)
         
+        # 3.5 Score mJJ dependence
+        from src.evaluation.metrics import calculate_score_mjj_dependence
+        metrics['score_mjj_dependence'] = calculate_score_mjj_dependence(mjj_bkg, scores_bkg)
+        
         # 4. Bump Hunt on Background + Signal mixture (f_test = 0.5% for example, here we use full test)
         # To simulate a realistic search, we inject some signal into the background test set.
         # Let's say we use a signal prevalence of 0.005 (0.5%)

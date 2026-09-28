@@ -84,6 +84,15 @@ def evaluate_mass_sculpting(mjj_bkg, score_bkg, thresholds):
             
     return results
 
+def calculate_score_mjj_dependence(mjj_bkg, score_bkg):
+    """
+    Calculate Pearson correlation coefficient between anomaly score and mJJ on background.
+    """
+    if len(mjj_bkg) < 2:
+        return 0.0
+    corr = np.corrcoef(mjj_bkg, score_bkg)[0, 1]
+    return float(corr)
+
 def get_core_metrics(y_true, y_score):
     fpr, tpr, _ = roc_curve(y_true, y_score)
     roc_auc = auc(fpr, tpr)
