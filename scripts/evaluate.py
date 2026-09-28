@@ -35,9 +35,15 @@ def load_eval_arrays(split_dir, features_file, config, scaler, split):
     bidx=np.load(os.path.join(split_dir,f'background_{split}.npy'))
     sidx=np.load(os.path.join(split_dir,f'signal2_{split}.npy'))
     cols=[0,1,2,3,4,5] if config['data'].get('use_mjj',False) else [0,1,2,3,4]
+    
+    if config['data'].get('use_extended', False):
+        cols=[0,1,2,3,4,5,6,7] if config['data'].get('use_mjj',False) else [0,1,2,3,4,5,6]
+        features_file = 'data/processed/events_v2_extended_features.h5'
+        
     with h5py.File(features_file,'r') as f: matrix=f['features'][:]
     xb=read_rows(matrix,bidx,cols); xs=read_rows(matrix,sidx,cols)
-    mb=matrix[bidx,5]; ms=matrix[sidx,5]
+    mjj_idx = 7 if config['data'].get('use_extended', False) else 5
+    mb=matrix[bidx,mjj_idx]; ms=matrix[sidx,mjj_idx]
     xb=scaler.transform(xb).astype(np.float32); xs=scaler.transform(xs).astype(np.float32)
     return xb,xs,np.concatenate([mb,ms]),np.r_[np.zeros(len(xb)),np.ones(len(xs))]
 

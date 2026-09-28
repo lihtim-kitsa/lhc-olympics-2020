@@ -53,6 +53,11 @@ def load_data(split_dir, features_file, config):
     bkg_val_idx = np.load(os.path.join(split_dir, 'background_val.npy'))
     sig_val_idx = np.load(os.path.join(split_dir, sig_val_file))
     cols = [0, 1, 2, 3, 4, 5] if data.get('use_mjj', False) else [0, 1, 2, 3, 4]
+    f2 = 'data/processed/events_v2_features.h5'
+    
+    if data.get('use_extended', False):
+        cols = [0, 1, 2, 3, 4, 5, 6, 7] if data.get('use_mjj', False) else [0, 1, 2, 3, 4, 5, 6]
+        f2 = 'data/processed/events_v2_extended_features.h5'
 
     if model_name == 'M5_Supervised':
         train_idx = np.concatenate([bkg_idx, sig_idx])
@@ -71,7 +76,7 @@ def load_data(split_dir, features_file, config):
 
     val_idx = np.concatenate([bkg_val_idx, sig_val_idx]) if model_name == 'M5_Supervised' else bkg_val_idx
     y_val = (np.isin(val_idx, sig_val_idx)).astype(np.float32) if model_name == 'M5_Supervised' else np.zeros(len(val_idx), dtype=np.float32)
-    with h5py.File(features_file, 'r') as f:
+    with h5py.File(f2, 'r') as f:
         all_features=f['features'][:]
     X_unscaled=all_features[unlabeled_idx][:,cols]
     X_val_unscaled=all_features[val_idx][:,cols]
@@ -149,7 +154,7 @@ from src.models.m0_tau_cut import TauCutBaseline
                 pickle.dump(model, out)
         elif name == 'M8_ANODE':
             from src.models.m8_anode import ANODEBaseline
-            mjj_unscaled = scaler.inverse_transform(X_u)[:, 5]
+            mjj_unscaled = scaler.inverse_transform(X_u)[:, -1]
             model = ANODEBaseline()
             model.fit(X_u, mjj_unscaled)
             with open(model_path, 'wb') as out:
@@ -160,7 +165,7 @@ from src.models.m0_tau_cut import TauCutBaseline
             
             if name == 'M7_CWoLa':
                 # CWoLa specific logic: redefine y_train based on mJJ regions
-                mjj_unscaled = scaler.inverse_transform(X_train)[:, 5]
+                mjj_unscaled = scaler.inverse_transform(X_train)[:, -1]
                 # Signal region: 3.3 to 3.7 TeV
                 sr_mask = (mjj_unscaled >= 3300) & (mjj_unscaled <= 3700)
                 # Sidebands: 2.5-3.3 and 3.7-4.5
@@ -190,7 +195,7 @@ from src.models.m0_tau_cut import TauCutBaseline
             criterion = nn.BCEWithLogitsLoss()
             
             if name == 'M7_CWoLa':
-                mjj_val_unscaled = scaler.inverse_transform(X_val)[:, 5]
+                mjj_val_unscaled = scaler.inverse_transform(X_val)[:, -1]
                 sr_val = (mjj_val_unscaled >= 3300) & (mjj_val_unscaled <= 3700)
                 sb_val = ((mjj_val_unscaled >= 2500) & (mjj_val_unscaled < 3300)) | ((mjj_val_unscaled > 3700) & (mjj_val_unscaled <= 4500))
                 val_mask = sr_val | sb_val
