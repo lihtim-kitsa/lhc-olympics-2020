@@ -8,6 +8,9 @@ env:
 data:
 	python scripts/download_data.py
 
+dummy-data:
+	python scripts/create_dummy_data.py
+
 features:
 	python scripts/build_features.py
 
@@ -24,9 +27,11 @@ reproduce:
 	make evaluate
 
 reproduce-fast:
+	make dummy-data
 	make features
-	make train
-	make evaluate
+	python src/data/make_dataset.py
+	python scripts/train.py --config configs/m1_autoencoder.yaml
+	python scripts/evaluate.py --config configs/m1_autoencoder.yaml
 
 clean:
 	rm -rf data/raw/*
