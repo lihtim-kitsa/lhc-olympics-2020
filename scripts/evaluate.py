@@ -9,6 +9,7 @@ from sklearn.metrics import roc_curve
 import mlflow
 import pickle
 import sys
+import uproot
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.models.m1_autoencoder import Autoencoder
@@ -170,6 +171,18 @@ def evaluate_model(config):
         mjj_bkg_post1 = mjj_bkg[scores_bkg >= thresholds['1pct']]
         bh_null_post1 = perform_bump_hunt(mjj_bkg_post1, prefix="null_at_1pct_bkg_")
         metrics.update(bh_null_post1)
+        
+        # 6. Stretch Goal: Export spectra to ROOT format
+        root_file_path = os.path.join('reports', f"{model_name}_{seed}_spectra.root")
+        os.makedirs('reports', exist_ok=True)
+        with uproot.recreate(root_file_path) as root_out:
+            bins = 40
+            r = (2500, 4500)
+            root_out["inclusive"] = np.histogram(mjj_test_mixture, bins=bins, range=r)
+            root_out["at_10pct_bkg"] = np.histogram(mjj_post10, bins=bins, range=r)
+            root_out["at_1pct_bkg"] = np.histogram(mjj_post1, bins=bins, range=r)
+        
+        mlflow.log_artifact(root_file_path)
         
         # Log to MLflow
         mlflow.log_metrics(metrics)
