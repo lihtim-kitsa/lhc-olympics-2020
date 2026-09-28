@@ -1,44 +1,29 @@
-.PHONY: all env data features train evaluate reproduce reproduce-fast clean test
+.PHONY: all setup data features splits train evaluate reproduce report test
 
-all: env data features train evaluate
+all: reproduce
 
-env:
-	pip install -e .[dev]
+setup:
+	python -m pip install -e ".[dev]"
 
 data:
 	python scripts/download_data.py
 
-dummy-data:
-	python scripts/create_dummy_data.py
-
 features:
 	python scripts/build_features.py
 
+splits:
+	python src/data/make_dataset.py
+
+# Convenience single-configuration commands. Use `make reproduce` for the full grid.
 train:
-	python scripts/train.py
+	python scripts/train.py --config configs/m1_autoencoder.yaml
 
 evaluate:
-	python scripts/evaluate.py
-
-reproduce:
-	make data
-	make features
-	make train
-	make evaluate
-
-reproduce-fast:
-	make dummy-data
-	make features
-	python src/data/make_dataset.py
-	python scripts/train.py --config configs/m1_autoencoder.yaml
 	python scripts/evaluate.py --config configs/m1_autoencoder.yaml
 
-clean:
-	rm -rf data/raw/*
-	rm -rf data/splits/*
-	rm -rf mlruns/*
-	rm -rf reports/figures/*
-	rm -rf reports/tables/*
+reproduce:
+	python scripts/reproduce.py
 
 test:
-	pytest tests/
+	python -m pytest tests/
+

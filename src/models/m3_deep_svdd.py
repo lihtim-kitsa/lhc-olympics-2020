@@ -19,7 +19,7 @@ class DeepSVDDNet(nn.Module):
         in_d = input_dim
         for h in hidden_dims:
             layers.append(BiasFreeLinear(in_d, h))
-            layers.append(nn.LeakyReLU(0.1)) # LeakyReLU works better without biases
+            layers.append(nn.ReLU()) # ReLU is bounded below, preventing zero-mean collapse
             in_d = h
             
         layers.append(BiasFreeLinear(in_d, latent_dim))

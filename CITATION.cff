@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Unsupervised and Semi-Supervised Anomaly Detection on the LHC Olympics 2020 R&D Dataset"
+type: software
+authors:
+  - family-names: Astik
+    given-names: Mithil Hardik
+    affiliation: Independent researcher
+version: 1.0.0
+date-released: 2026-09-28
+license: MIT
+abstract: >-
+  Reproducible simulation-only benchmark comparing unsupervised and semi-supervised
+  anomaly detection methods on the LHC Olympics 2020 R&D dataset, including contamination,
+  held-out topology, and background-mass-shaping studies.
+keywords:
+  - anomaly detection
+  - particle physics
+  - LHC Olympics
+  - Deep SVDD
+  - Deep SAD

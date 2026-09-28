@@ -66,16 +66,16 @@ def evaluate_mass_sculpting(mjj_bkg, score_bkg, thresholds):
     # Define bins
     bins = np.linspace(2000, 5000, 50)
     
-    hist_incl, _ = np.histogram(mjj_bkg, bins=bins, density=True)
-    hist_incl = hist_incl * np.diff(bins) # normalize to sum 1
+    hist_incl, _ = np.histogram(mjj_bkg, bins=bins)
+    hist_incl = hist_incl / hist_incl.sum() if hist_incl.sum() else np.zeros_like(hist_incl, dtype=float)
     
     results = {}
     for name, thresh in thresholds.items():
         # Apply cut: score >= thresh
         selected_mjj = mjj_bkg[score_bkg >= thresh]
         if len(selected_mjj) > 0:
-            hist_cut, _ = np.histogram(selected_mjj, bins=bins, density=True)
-            hist_cut = hist_cut * np.diff(bins)
+            hist_cut, _ = np.histogram(selected_mjj, bins=bins)
+            hist_cut = hist_cut / hist_cut.sum() if hist_cut.sum() else np.zeros_like(hist_cut, dtype=float)
             
             jsd = calculate_js_divergence(hist_incl, hist_cut)
             results[f'mass_sculpting_jsd_at_{name}_bkg'] = jsd
@@ -89,6 +89,8 @@ def calculate_score_mjj_dependence(mjj_bkg, score_bkg):
     Calculate Pearson correlation coefficient between anomaly score and mJJ on background.
     """
     if len(mjj_bkg) < 2:
+        return 0.0
+    if np.std(mjj_bkg) == 0 or np.std(score_bkg) == 0:
         return 0.0
     corr = np.corrcoef(mjj_bkg, score_bkg)[0, 1]
     return float(corr)

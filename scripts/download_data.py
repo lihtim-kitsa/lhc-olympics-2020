@@ -20,6 +20,7 @@ MANIFEST_PATH = os.path.join('data', 'manifest.yaml')
 
 def download_and_verify(url, filename, expected_checksum, expected_size):
     filepath = os.path.join(DATA_DIR, filename)
+    os.makedirs(DATA_DIR, exist_ok=True)
     if os.path.exists(filepath):
         print(f"File {filename} already exists. Verifying checksum...")
         if verify_checksum(filepath, expected_checksum):
@@ -30,15 +31,21 @@ def download_and_verify(url, filename, expected_checksum, expected_size):
 
     print(f"Downloading {filename}...")
     # Add simple progress reporter
+    last_bucket = [-10]
     def reporthook(count, block_size, total_size):
         percent = int(count * block_size * 100 / total_size)
-        if percent % 10 == 0:
-            print(f"\rDownloading {filename}: {percent}%", end="")
+        bucket = min(100, (percent // 10) * 10)
+        if bucket > last_bucket[0]:
+            last_bucket[0] = bucket
+            print(f"\rDownloading {filename}: {bucket}%", end="", flush=True)
 
-    urllib.request.urlretrieve(url, filepath, reporthook=reporthook)
+    # Download beside the destination and only replace it after size/checksum
+    # validation. Interrupted transfers therefore cannot corrupt a usable file.
+    partial_path = filepath + '.part'
+    urllib.request.urlretrieve(url, partial_path, reporthook=reporthook)
     print()
-    
-    if verify_checksum(filepath, expected_checksum):
+    if os.path.getsize(partial_path) == expected_size and verify_checksum(partial_path, expected_checksum):
+        os.replace(partial_path, filepath)
         print(f"Checksum verified for {filename}.")
         return True
     else:
@@ -53,6 +60,13 @@ def verify_checksum(filepath, expected_checksum):
     file_hash = f"md5:{hash_md5.hexdigest()}"
     return file_hash == expected_checksum
 
+def sha256_file(filepath):
+    digest = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     
@@ -66,7 +80,7 @@ def main():
         'record_version': record_data.get('metadata', {}).get('version', 'v5'),
         'download_date': datetime.datetime.now().isoformat(),
         'files': [],
-        'feature_schema_version': '1.0.0'
+        'feature_schema_version': '1.1.0'
     }
     
     for f in record_data['files']:
@@ -82,7 +96,8 @@ def main():
                 manifest['files'].append({
                     'filename': filename,
                     'byte_size': f['size'],
-                    'checksum': f['checksum']
+                    'checksum': f['checksum'],
+                    'sha256': sha256_file(os.path.join(DATA_DIR, filename))
                 })
     
     with open(MANIFEST_PATH, 'w') as mf:

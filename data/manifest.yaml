@@ -1,0 +1,22 @@
+dataset: LHC Olympics 2020 R&D dataset
+zenodo_doi: 10.5281/zenodo.6466204
+record_version: v5
+download_date: '2026-09-28T11:55:02.663378'
+files:
+- filename: events_anomalydetection_Z_XY_qqq.features.h5
+  byte_size: 5176081
+  checksum: md5:1e729f7dff225451182c28afaa4bb411
+  sha256: c73b85da48e4369be017f90149e843bf6be58a125251420b748c31cead9cadb2
+- filename: events_anomalydetection_v2.features.h5
+  byte_size: 74315238
+  checksum: md5:271cf5e71fc756b2a8d2b32730689bdb
+  sha256: 933b1f11d7b66e6dae0ee2878723f8f5d7ab0f38399806f2d067c5cfd9a502b1
+- filename: events_anomalydetection_v2.h5
+  byte_size: 2908260409
+  checksum: md5:629789d55813be3860781b084ae7f1de
+  sha256: 5da8fda2ca78edf8fa5acc0af92fcb6a2d464ba7bf0fd75e3944a169b88cecc6
+- filename: events_anomalydetection_Z_XY_qqq.h5
+  byte_size: 235488994
+  checksum: md5:54e123a86143b668f9cb76905152a124
+  sha256: 063fff3547d17bf4f36a40109e940ac6990105a0fe33a79f4f7c630905dd0742
+feature_schema_version: 1.0.0

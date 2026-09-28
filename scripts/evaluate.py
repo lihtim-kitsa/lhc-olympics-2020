@@ -1,15 +1,18 @@
-import os
+"""Evaluate frozen detectors with validation-selected background cuts."""
 import argparse
-import yaml
-import numpy as np
-import h5py
-import torch
-import pandas as pd
-from sklearn.metrics import roc_curve
-import mlflow
+import os
 import pickle
 import sys
+
+import h5py
+import matplotlib.pyplot as plt
+import mlflow
+import numpy as np
+import pandas as pd
+import torch
 import uproot
+import yaml
+from sklearn.metrics import roc_auc_score
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.models.m1_autoencoder import Autoencoder
@@ -17,208 +20,179 @@ from src.models.m2_isolation_forest import IsolationForestAnomalyDetector
 from src.models.m3_deep_svdd import DeepSVDD
 from src.models.m4_deep_sad import DeepSAD
 from src.models.m5_supervised import SupervisedMLP
-from src.evaluation.metrics import get_core_metrics, evaluate_mass_sculpting
-from src.evaluation.bump_hunt import perform_bump_hunt
+from src.evaluation.metrics import get_core_metrics, evaluate_mass_sculpting, calculate_score_mjj_dependence
+from src.evaluation.bump_hunt import perform_bump_hunt, bootstrap_null_significances
 
-def load_test_data(split_dir, features_file, config, scaler):
-    bkg_test_idx = np.load(os.path.join(split_dir, 'background_test.npy'))
-    sig_test_idx = np.load(os.path.join(split_dir, 'signal2_test.npy'))
-    
-    with h5py.File(features_file, 'r') as f:
-        dset = f['features']
-        use_mjj = config['data'].get('use_mjj', False)
-        feat_cols = [0, 1, 2, 3, 4, 5] if use_mjj else [0, 1, 2, 3, 4]
-        
-        # Load background
-        X_bkg = np.zeros((len(bkg_test_idx), len(feat_cols)), dtype=np.float32)
-        mjj_bkg = np.zeros(len(bkg_test_idx), dtype=np.float32)
-        for i, idx in enumerate(bkg_test_idx):
-            X_bkg[i] = dset[idx, feat_cols]
-            mjj_bkg[i] = dset[idx, 5]
-            
-        y_bkg = np.zeros(len(X_bkg), dtype=np.float32)
-        
-        # Load signal
-        X_sig = np.zeros((len(sig_test_idx), len(feat_cols)), dtype=np.float32)
-        mjj_sig = np.zeros(len(sig_test_idx), dtype=np.float32)
-        for i, idx in enumerate(sig_test_idx):
-            X_sig[i] = dset[idx, feat_cols]
-            mjj_sig[i] = dset[idx, 5]
-            
-        y_sig = np.ones(len(X_sig), dtype=np.float32)
-        
-    X_test = np.vstack([X_bkg, X_sig])
-    y_test = np.concatenate([y_bkg, y_sig])
-    mjj_test = np.concatenate([mjj_bkg, mjj_sig])
-    
-    # Scale features
-    X_test_scaled = scaler.transform(X_test)
-    X_bkg_scaled = scaler.transform(X_bkg)
-    
-    return X_test_scaled, y_test, mjj_test, X_bkg_scaled, y_bkg, mjj_bkg
+
+def read_rows(dset, indices, cols):
+    indices=np.asarray(indices,dtype=np.int64)
+    if not len(indices): return np.empty((0,len(cols)),dtype=np.float32)
+    matrix=dset[:] if isinstance(dset,h5py.Dataset) else np.asarray(dset)
+    return matrix[indices][:,cols]
+
+
+def load_eval_arrays(split_dir, features_file, config, scaler, split):
+    bidx=np.load(os.path.join(split_dir,f'background_{split}.npy'))
+    sidx=np.load(os.path.join(split_dir,f'signal2_{split}.npy'))
+    cols=[0,1,2,3,4,5] if config['data'].get('use_mjj',False) else [0,1,2,3,4]
+    with h5py.File(features_file,'r') as f: matrix=f['features'][:]
+    xb=read_rows(matrix,bidx,cols); xs=read_rows(matrix,sidx,cols)
+    mb=matrix[bidx,5]; ms=matrix[sidx,5]
+    xb=scaler.transform(xb).astype(np.float32); xs=scaler.transform(xs).astype(np.float32)
+    return xb,xs,np.concatenate([mb,ms]),np.r_[np.zeros(len(xb)),np.ones(len(xs))]
+
+
+def load_model(name, variant, seed, input_dim, config, device):
+    path=os.path.join('models',f'{name}_{variant}_{seed}.pt')
+    if not os.path.exists(path): raise FileNotFoundError(f'Trained model checkpoint missing: {path}')
+    if name=='M2_IsolationForest':
+        with open(path,'rb') as f: return pickle.load(f)
+    ckpt=torch.load(path,map_location=device,weights_only=True)
+    if name=='M1_Autoencoder': model=Autoencoder(input_dim)
+    elif name in ('M3_DeepSVDD','M6_MassAware'):
+        model=DeepSVDD(input_dim); model.c=ckpt['center']
+    elif name=='M4_DeepSAD':
+        model=DeepSAD(input_dim,eta=config['model'].get('eta',1.0)); model.c=ckpt['center']
+    elif name=='M5_Supervised': model=SupervisedMLP(input_dim)
+    else: raise ValueError(f'Unknown model: {name}')
+    model.load_state_dict(ckpt['model_state_dict']); return model.to(device).eval()
+
+
+def score(model, X, name, device):
+    if name=='M2_IsolationForest': return model.get_anomaly_score(X)
+    out=[]
+    with torch.no_grad():
+        for start in range(0,len(X),10000):
+            x=torch.as_tensor(X[start:start+10000],dtype=torch.float32,device=device)
+            out.append(model.get_anomaly_score(x).detach().cpu().numpy())
+    return np.concatenate(out) if out else np.empty(0)
+
+
+def threshold_at_efficiency(scores, efficiency):
+    if not len(scores): raise ValueError('Empty validation background score array')
+    return float(np.quantile(scores,1-efficiency,method='higher'))
+
+
+def save_mass_diagnostics(mjj,scores,thresholds,path):
+    edges=np.linspace(2500,4500,21); centers=.5*(edges[:-1]+edges[1:])
+    total,_=np.histogram(mjj,bins=edges)
+    fig,axes=plt.subplots(1,3,figsize=(15,4.2))
+    axes[0].step(centers,total/max(total.sum(),1),where='mid',color='#203B53',label='Inclusive background')
+    for key,color in (('10pct','#158B8B'),('1pct','#C7832D')):
+        selected=scores>=thresholds[key]
+        passing,_=np.histogram(mjj[selected],bins=edges)
+        norm=passing.sum()
+        if norm: axes[0].step(centers,passing/norm,where='mid',color=color,label=f"Score cut, validation εB={key}")
+        eff=np.divide(passing,total,out=np.full(len(total),np.nan,dtype=float),where=total>0)
+        err=np.sqrt(np.divide(eff*(1-eff),total,out=np.zeros_like(eff),where=total>0))
+        axes[1].errorbar(centers,eff,yerr=err,fmt='o-',ms=3,color=color,label=f'Validation εB={key}')
+    # Binned mean anomaly score reveals residual score-mass dependence.
+    means=[]; errors=[]
+    for lo,hi in zip(edges[:-1],edges[1:]):
+        vals=scores[(mjj>=lo)&(mjj<hi)]
+        means.append(float(np.mean(vals)) if len(vals) else np.nan)
+        errors.append(float(np.std(vals)/np.sqrt(len(vals))) if len(vals)>1 else np.nan)
+    axes[2].errorbar(centers,means,yerr=errors,fmt='o-',ms=3,color='#70469B',label='Background mean score')
+    axes[0].set(title='Background mass spectrum',xlabel='$m_{JJ}$ [GeV]',ylabel='Normalized events')
+    axes[1].set(title='Binned background acceptance',xlabel='$m_{JJ}$ [GeV]',ylabel='Score acceptance')
+    axes[2].set(title='Mean score by mass bin',xlabel='$m_{JJ}$ [GeV]',ylabel='Mean anomaly score')
+    for ax in axes: ax.grid(alpha=.2); ax.legend(fontsize=7)
+    fig.tight_layout(); os.makedirs(os.path.dirname(path),exist_ok=True); fig.savefig(path,dpi=160); plt.close(fig)
+
 
 def evaluate_model(config):
+    mlflow.set_tracking_uri('sqlite:///mlflow_reproduction.db')
     mlflow.set_experiment(config['mlflow']['experiment_name'])
-    
     with mlflow.start_run():
-        model_name = config['model']['name']
-        seed = config['training']['seed']
-        
-        model_path = os.path.join('models', f"{model_name}_{seed}.pt")
-        scaler_path = os.path.join('models', f"scaler_{model_name}_{seed}.pkl")
-        
-        if not os.path.exists(scaler_path):
-            # Model not trained yet
-            print(f"Skipping evaluation, model {model_name}_{seed} not found.")
-            return
-            
-        with open(scaler_path, 'rb') as f:
-            scaler = pickle.load(f)
-            
-        split_dir = os.path.join('data', 'splits')
-        features_file = os.path.join('data', 'processed', 'events_v2_features.h5')
-        
-        X_test, y_test, mjj_test, X_bkg, y_bkg, mjj_bkg = load_test_data(split_dir, features_file, config, scaler)
-        
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        input_dim = X_test.shape[1]
-        
-        # Load Model
-        if model_name == 'M2_IsolationForest':
-            model_path_pkl = os.path.join('models', f"{model_name}_{seed}.pkl")
-            with open(model_path_pkl, 'rb') as f:
-                model = pickle.load(f)
-            scores = model.get_anomaly_score(X_test)
-            scores_bkg = model.get_anomaly_score(X_bkg)
-        else:
-            checkpoint = torch.load(model_path, map_location=device, weights_only=True)
-            if model_name == 'M1_Autoencoder':
-                model = Autoencoder(input_dim=input_dim).to(device)
-            elif model_name == 'M3_DeepSVDD' or model_name == 'M6_MassAware':
-                model = DeepSVDD(input_dim=input_dim).to(device)
-                model.c = checkpoint['center']
-            elif model_name == 'M4_DeepSAD':
-                model = DeepSAD(input_dim=input_dim, eta=config['model'].get('eta', 1.0)).to(device)
-                model.c = checkpoint['center']
-            elif model_name == 'M5_Supervised':
-                model = SupervisedMLP(input_dim=input_dim).to(device)
-                
-            model.load_state_dict(checkpoint['model_state_dict'])
-            
-            # Compute scores in batches to avoid OOM
-            model.eval()
-            scores = []
-            batch_size = 10000
-            with torch.no_grad():
-                for i in range(0, len(X_test), batch_size):
-                    batch = torch.tensor(X_test[i:i+batch_size], dtype=torch.float32).to(device)
-                    scores.append(model.get_anomaly_score(batch).cpu().numpy())
-            scores = np.concatenate(scores)
-            
-            scores_bkg = []
-            with torch.no_grad():
-                for i in range(0, len(X_bkg), batch_size):
-                    batch = torch.tensor(X_bkg[i:i+batch_size], dtype=torch.float32).to(device)
-                    scores_bkg.append(model.get_anomaly_score(batch).cpu().numpy())
-            scores_bkg = np.concatenate(scores_bkg)
+        _evaluate_model(config)
 
-        # 1. Core Metrics
-        metrics = get_core_metrics(y_test, scores)
-        
-        # 2. Find thresholds for eB = 10% and 1% on validation set ideally, but here we use test bkg for simplicity
-        # (In strict PRD: "chosen on the validation background", this is a slight shortcut for the code structure)
-        eB_10_percentile = np.percentile(scores_bkg, 90) # top 10%
-        eB_1_percentile = np.percentile(scores_bkg, 99)  # top 1%
-        
-        thresholds = {
-            '10pct': eB_10_percentile,
-            '1pct': eB_1_percentile
-        }
-        
-        # 3. Mass Sculpting JS Divergence
-        sculpting_metrics = evaluate_mass_sculpting(mjj_bkg, scores_bkg, thresholds)
-        metrics.update(sculpting_metrics)
-        
-        # 3.5 Score mJJ dependence
-        from src.evaluation.metrics import calculate_score_mjj_dependence
-        metrics['score_mjj_dependence'] = calculate_score_mjj_dependence(mjj_bkg, scores_bkg)
-        
-        # 4. Bump Hunt on Background + Signal mixture (f_test = 0.5% for example, here we use full test)
-        # To simulate a realistic search, we inject some signal into the background test set.
-        # Let's say we use a signal prevalence of 0.005 (0.5%)
-        np.random.seed(seed)
-        n_test_bkg = len(y_bkg)
-        n_test_sig_inject = int(n_test_bkg * 0.005)
-        test_sig_indices = np.random.choice(len(mjj_test[y_test == 1]), n_test_sig_inject, replace=False)
-        
-        mjj_test_mixture = np.concatenate([mjj_bkg, mjj_test[y_test == 1][test_sig_indices]])
-        scores_test_mixture = np.concatenate([scores_bkg, scores[y_test == 1][test_sig_indices]])
-        
-        # Bump hunt pre-cut
-        bh_pre = perform_bump_hunt(mjj_test_mixture, prefix="pre_cut_")
-        metrics.update(bh_pre)
-        
-        # Bump hunt post-cut 10%
-        mjj_post10 = mjj_test_mixture[scores_test_mixture >= thresholds['10pct']]
-        bh_post10 = perform_bump_hunt(mjj_post10, prefix="at_10pct_bkg_")
-        metrics.update(bh_post10)
-        
-        # Bump hunt post-cut 1%
-        mjj_post1 = mjj_test_mixture[scores_test_mixture >= thresholds['1pct']]
-        bh_post1 = perform_bump_hunt(mjj_post1, prefix="at_1pct_bkg_")
-        metrics.update(bh_post1)
-        
-        # 5. Null Test (Background only)
-        bh_null_pre = perform_bump_hunt(mjj_bkg, prefix="null_pre_cut_")
-        metrics.update(bh_null_pre)
-        
-        mjj_bkg_post1 = mjj_bkg[scores_bkg >= thresholds['1pct']]
-        bh_null_post1 = perform_bump_hunt(mjj_bkg_post1, prefix="null_at_1pct_bkg_")
-        metrics.update(bh_null_post1)
-        
-        # 6. Stretch Goal: Export spectra to ROOT format
-        root_file_path = os.path.join('reports', f"{model_name}_{seed}_spectra.root")
-        os.makedirs('reports', exist_ok=True)
-        with uproot.recreate(root_file_path) as root_out:
-            bins = 40
-            r = (2500, 4500)
-            root_out["inclusive"] = np.histogram(mjj_test_mixture, bins=bins, range=r)
-            root_out["at_10pct_bkg"] = np.histogram(mjj_post10, bins=bins, range=r)
-            root_out["at_1pct_bkg"] = np.histogram(mjj_post1, bins=bins, range=r)
-        
-        mlflow.log_artifact(root_file_path)
-        
-        # Log to MLflow
-        mlflow.log_metrics(metrics)
-        
-        # Save to CSV
-        os.makedirs(os.path.join('reports', 'tables'), exist_ok=True)
-        results_file = os.path.join('reports', 'tables', 'results.csv')
-        
-        record = {
-            'model': model_name,
-            'f_train': config['data']['f_train'],
-            'k_labels': config['data'].get('k_labels', 0),
-            'seed': seed,
-            **metrics
-        }
-        
-        df_new = pd.DataFrame([record])
-        if os.path.exists(results_file):
-            df = pd.read_csv(results_file)
-            df = pd.concat([df, df_new], ignore_index=True)
-        else:
-            df = df_new
-        df.to_csv(results_file, index=False)
-        
-        print(f"Metrics saved for {model_name} (seed {seed})")
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, required=True)
-    args = parser.parse_args()
-    
-    with open(args.config, 'r') as f:
-        config = yaml.safe_load(f)
-        
+def _evaluate_model(config):
+    name=config['model']['name']; seed=int(config['training']['seed'])
+    variant=f"f{float(config['data'].get('f_train',0)):g}_k{int(config['data'].get('k_labels',0))}"
+    scaler_path=os.path.join('models',f'scaler_{name}_{variant}_{seed}.pkl')
+    with open(scaler_path,'rb') as f: scaler=pickle.load(f)
+    split_dir='data/splits'; f2='data/processed/events_v2_features.h5'
+    device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    Xb,Xs,mjj_test,y_test=load_eval_arrays(split_dir,f2,config,scaler,'test')
+    Xbv,_,mjj_val,_=load_eval_arrays(split_dir,f2,config,scaler,'val')
+    model=load_model(name,variant,seed,Xb.shape[1],config,device)
+    sb,ss=score(model,Xb,name,device),score(model,Xs,name,device)
+    sbv=score(model,Xbv,name,device)
+    scores=np.r_[sb,ss]
+    metrics=get_core_metrics(y_test,scores)
+    metrics['n_test_background']=int(len(sb)); metrics['n_test_signal_2prong']=int(len(ss))
+    metrics['test_signal_prevalence']=float(len(ss)/(len(sb)+len(ss)))
+    thresholds={'10pct':threshold_at_efficiency(sbv,.10),'1pct':threshold_at_efficiency(sbv,.01)}
+    metrics.update(evaluate_mass_sculpting(np.asarray(mjj_test[:len(sb)]),sb,thresholds))
+    metrics['score_mjj_dependence']=calculate_score_mjj_dependence(np.asarray(mjj_test[:len(sb)]),sb)
+    for key,th in thresholds.items(): metrics[f'validation_threshold_{key}']=th
+    metrics['validation_bkg_eff_at_10pct']=float(np.mean(sbv>=thresholds['10pct']))
+    metrics['validation_bkg_eff_at_1pct']=float(np.mean(sbv>=thresholds['1pct']))
+    variant=f"f{float(config['data'].get('f_train',0)):g}_k{int(config['data'].get('k_labels',0))}"
+    diagnostic_path=os.path.join('reports','figures',f'{name}_{variant}_{seed}_mass_diagnostics.png')
+    save_mass_diagnostics(np.asarray(mjj_test[:len(sb)]),sb,thresholds,diagnostic_path)
+
+    rng=np.random.default_rng(seed)
+    n_inj=min(int(len(sb)*.005),len(ss))
+    chosen=rng.choice(len(ss),n_inj,replace=False) if n_inj else np.empty(0,dtype=int)
+    mjj_bkg=np.asarray(mjj_test[:len(sb)])
+    mjj_mix=np.r_[mjj_bkg,np.asarray(mjj_test[len(sb):])[chosen]]
+    score_mix=np.r_[sb,ss[chosen]]
+    metrics.update(perform_bump_hunt(mjj_mix,prefix='pre_cut_'))
+    post10=mjj_mix[score_mix>=thresholds['10pct']]
+    post1=mjj_mix[score_mix>=thresholds['1pct']]
+    metrics.update(perform_bump_hunt(post10,prefix='at_10pct_bkg_'))
+    metrics.update(perform_bump_hunt(post1,prefix='at_1pct_bkg_'))
+    null_pre=perform_bump_hunt(mjj_bkg,prefix='null_pre_cut_')
+    metrics.update(null_pre)
+    z_pre=null_pre['null_pre_cut_local_significance']
+    pre_boot=bootstrap_null_significances(mjj_bkg,n_trials=50,seed=seed,observed_z=z_pre)
+    for key,value in pre_boot.items(): metrics[f'null_pre_bootstrap_{key}']=value
+    post_null=mjj_bkg[sb>=thresholds['1pct']]
+    null_post=perform_bump_hunt(post_null,prefix='null_at_1pct_bkg_')
+    metrics.update(null_post)
+    z_post=null_post['null_at_1pct_bkg_local_significance']
+    post_boot=bootstrap_null_significances(post_null,n_trials=50,seed=seed+1,observed_z=z_post)
+    for key,value in post_boot.items(): metrics[f'null_at_1pct_bootstrap_{key}']=value
+
+    # Held-out 3-prong signals are scored against the unchanged 2-prong background test sample.
+    f3='data/processed/events_Z_XY_qqq_features.h5'; i3=os.path.join(split_dir,'signal3_test.npy')
+    if os.path.exists(f3) and os.path.exists(i3):
+        with h5py.File(f3,'r') as f: matrix3=f['features'][:]
+        idx=np.load(i3); cols=[0,1,2,3,4,5] if config['data'].get('use_mjj',False) else [0,1,2,3,4]
+        x3=matrix3[idx][:,cols]; m3=matrix3[idx,5]
+        x3=scaler.transform(x3).astype(np.float32); s3=score(model,x3,name,device)
+        metrics['roc_auc_3prong']=float(roc_auc_score(np.r_[np.zeros(len(sb)),np.ones(len(s3))],np.r_[sb,s3]))
+        metrics['n_test_signal_3prong']=int(len(s3))
+        for e in (.01,.05,.10,.30,.50):
+            cut=np.quantile(s3,1-e,method='higher') if len(s3) else np.inf
+            eb=float(np.mean(sb>=cut))
+            metrics[f'rej_{int(e*100)}_3prong']=float(1/eb) if eb else float('inf')
+        metrics['3prong_mjj_median']=float(np.nanmedian(m3))
+
+    os.makedirs('reports',exist_ok=True)
+    root_path=os.path.join('reports',f'{name}_{seed}_spectra.root')
+    with uproot.recreate(root_path) as fout:
+        for key,values in [('inclusive',mjj_mix),('at_10pct_bkg',post10),('at_1pct_bkg',post1)]:
+            fout[key]=np.histogram(values,bins=40,range=(2500,4500))
+    mlflow.log_artifact(root_path)
+    mlflow.log_artifact(diagnostic_path)
+    results_path='reports/tables/results.csv'; os.makedirs(os.path.dirname(results_path),exist_ok=True)
+    record={'model':name,'f_train':config['data']['f_train'],'k_labels':config['data'].get('k_labels',0),'seed':seed,**metrics}
+    df=pd.DataFrame([record])
+    if os.path.exists(results_path):
+        old=pd.read_csv(results_path)
+        old=old[~((old.model==name)&(old.seed==seed)&(old.f_train==record['f_train'])&(old.k_labels==record['k_labels']))]
+        df=pd.concat([old,df],ignore_index=True,sort=False)
+    df.to_csv(results_path,index=False)
+    mlflow.log_metrics({k:v for k,v in metrics.items() if np.isfinite(v)})
+    print(f"Saved validation-thresholded test metrics for {name} seed={seed}")
+
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(); parser.add_argument('--config',required=True)
+    args=parser.parse_args()
+    with open(args.config,encoding='utf-8') as f: config=yaml.safe_load(f)
     evaluate_model(config)
+

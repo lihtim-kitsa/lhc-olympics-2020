@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+mlruns/
+mlflow_reproduction.db
+models/*.pt
+models/*.pkl
+data/raw/
+reports/*.root
+reports/tables/experiment_samples/
+reports/tables/results.csv
+reports/tables/run_manifest.json
+reports/tables/replicate_summary.csv
+reports/feature_validation_*.json
