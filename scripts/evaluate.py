@@ -51,21 +51,24 @@ def load_eval_arrays(split_dir, features_file, config, scaler, split):
 def load_model(name, variant, seed, input_dim, config, device):
     path=os.path.join('models',f'{name}_{variant}_{seed}.pt')
     if not os.path.exists(path): raise FileNotFoundError(f'Trained model checkpoint missing: {path}')
-    if name=='M2_IsolationForest':
+    if name in ('M2_IsolationForest', 'M0_TauCut', 'M8_ANODE', 'M12_CWoLaTrees', 'M11_CATHODE_CVAE'):
         with open(path,'rb') as f: return pickle.load(f)
-    ckpt=torch.load(path,map_location=device,weights_only=True)
+    ckpt=torch.load(path,map_location=device,weights_only=False)
     if name=='M1_Autoencoder': model=Autoencoder(input_dim)
     elif name in ('M3_DeepSVDD','M6_MassAware'):
         model=DeepSVDD(input_dim); model.c=ckpt['center']
     elif name=='M4_DeepSAD':
         model=DeepSAD(input_dim,eta=config['model'].get('eta',1.0)); model.c=ckpt['center']
     elif name=='M5_Supervised': model=SupervisedMLP(input_dim)
+    elif name=='M7_CWoLa':
+        from src.models.m7_cwola import CWoLaClassifier
+        model=CWoLaClassifier(5)
     else: raise ValueError(f'Unknown model: {name}')
     model.load_state_dict(ckpt['model_state_dict']); return model.to(device).eval()
 
 
 def score(model, X, name, device):
-    if name=='M2_IsolationForest': return model.get_anomaly_score(X)
+    if name in ('M2_IsolationForest', 'M0_TauCut', 'M8_ANODE', 'M12_CWoLaTrees', 'M11_CATHODE_CVAE'): return model.get_anomaly_score(X)
     out=[]
     with torch.no_grad():
         for start in range(0,len(X),10000):

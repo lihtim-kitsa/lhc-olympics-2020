@@ -1,0 +1,20 @@
+model:
+  name: "M9_MDSWAD"
+  lam: 1.0
+
+data:
+  f_train: 0.5
+  k_labels: 100
+  use_mjj: false
+  use_extended: false
+
+training:
+  seed: 42
+  epochs: 50
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  patience: 8
+
+mlflow:
+  experiment_name: "LHCO_Anomaly_Detection"

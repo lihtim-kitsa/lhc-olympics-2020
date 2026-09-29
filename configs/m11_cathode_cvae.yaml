@@ -1,0 +1,14 @@
+data:
+  features: "configs/features.yaml"
+  f_train: 0.0
+  k_labels: 0
+  use_mjj: true
+
+model:
+  name: "M11_CATHODE_CVAE"
+
+training:
+  seed: 42
+
+mlflow:
+  experiment_name: "LHC_Olympics_R&D"

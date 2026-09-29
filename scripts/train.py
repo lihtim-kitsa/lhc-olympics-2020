@@ -24,7 +24,7 @@ from src.models.m2_isolation_forest import IsolationForestAnomalyDetector
 from src.models.m3_deep_svdd import DeepSVDD
 from src.models.m4_deep_sad import DeepSAD
 from src.models.m5_supervised import SupervisedMLP
-
+from src.models.m9_md_swad import MDSWAD, distance_correlation
 
 def _read_rows(dset, indices, cols):
     """Read unique rows through h5py's sorted-index interface, preserving order."""
@@ -141,8 +141,7 @@ def train_model(config):
         with open(os.path.join(sample_dir,f'{name}_{variant}_{seed}.json'),'w',encoding='utf-8') as f:
             json.dump({'model':name,'f_train_percent':config['data'].get('f_train',0),'k_labels':config['data'].get('k_labels',0),'seed':seed,'background_train_count':int(len(np.load(os.path.join(split_dir,'background_train.npy')))),'background_train_indices_sha256':bkg_hash,'injected_signal_count':int(len(injected_signal_idx)),'labeled_signal_count':int(len(labeled_signal_idx)),'signal_index_file':os.path.basename(sample_path)},f,indent=2)
 
-from src.models.m0_tau_cut import TauCutBaseline
-
+        from src.models.m0_tau_cut import TauCutBaseline
         if name == 'M2_IsolationForest':
             model = IsolationForestAnomalyDetector(config['model'].get('n_estimators', 100), random_state=seed)
             model.fit(X_u)
@@ -157,6 +156,25 @@ from src.models.m0_tau_cut import TauCutBaseline
             mjj_unscaled = scaler.inverse_transform(X_u)[:, -1]
             model = ANODEBaseline()
             model.fit(X_u, mjj_unscaled)
+            with open(model_path, 'wb') as out:
+                pickle.dump(model, out)
+        elif name == 'M11_CATHODE_CVAE':
+            from src.models.m11_cathode_cvae import CATHODEBaseline
+            mjj_unscaled = scaler.inverse_transform(X_u)[:, -1]
+            model = CATHODEBaseline(random_state=seed, epochs_cvae=15, epochs_clf=15)
+            model.fit(X_u, mjj_unscaled)
+            with open(model_path, 'wb') as out:
+                pickle.dump(model, out)
+        elif name == 'M12_CWoLaTrees':
+            from src.models.m12_cwola_trees import CWoLaTreesBaseline
+            mjj_unscaled = scaler.inverse_transform(X_u)[:, -1]
+            sr_mask = (mjj_unscaled >= 3300) & (mjj_unscaled <= 3700)
+            sb_mask = ((mjj_unscaled >= 2500) & (mjj_unscaled < 3300)) | ((mjj_unscaled > 3700) & (mjj_unscaled <= 4500))
+            valid_mask = sr_mask | sb_mask
+            y_cwola = sr_mask[valid_mask].astype(np.float32)
+            X_cwola = X_u[valid_mask]
+            model = CWoLaTreesBaseline(random_state=seed)
+            model.fit(X_cwola, y_cwola)
             with open(model_path, 'wb') as out:
                 pickle.dump(model, out)
         else:
