@@ -1,0 +1,23 @@
+{
+  "recorded_utc": "2026-10-02T18:32:11.658551+00:00",
+  "hypotheses": [
+    {
+      "id": "xtoyyprime",
+      "events_path": "xtoyyprime\\events.h5",
+      "source_record": "https://zenodo.org/records/18983506",
+      "archive_url": "https://zenodo.org/records/18983506/files/XtoYYprime.tar.gz?download=1",
+      "archive_md5": "c75e84491ff7dc3695bb0986d31211c7",
+      "events_sha256": "bfc52922ec19cf6cea18e05e0a49251db468a6b998444d719501b61d712df761",
+      "events_bytes": 75652482
+    },
+    {
+      "id": "xtowrto3w",
+      "events_path": "xtowrto3w\\events.h5",
+      "source_record": "https://zenodo.org/records/18983506",
+      "archive_url": "https://zenodo.org/records/18983506/files/XtoWRto3W.tar.gz?download=1",
+      "archive_md5": "cfb1058c63036d4384802d4a70554df1",
+      "events_sha256": "487e7a6fe897a77eaa0c6761d29fb2c2f7daaf70ade5a2473d0106bda3dca5ac",
+      "events_bytes": 52677295
+    }
+  ]
+}

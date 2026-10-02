@@ -1,25 +1,21 @@
 import numpy as np
 from sklearn.metrics import roc_curve, auc
 from scipy.spatial.distance import jensenshannon
+from src.evaluation.working_points import score_cut, score_cut_weights
 
 def calculate_rejection_at_efficiency(y_true, y_score, target_effs=[0.01, 0.05, 0.10, 0.30, 0.50]):
     """
     Calculate background rejection (1 / eB) at given signal efficiencies (eS).
     """
-    fpr, tpr, thresholds = roc_curve(y_true, y_score)
-    # tpr is signal efficiency, fpr is background efficiency
-    
+    y_true = np.asarray(y_true)
+    y_score = np.asarray(y_score, dtype=float)
+    signal_scores = y_score[y_true == 1]
+    background_scores = y_score[y_true == 0]
     results = {}
     for eff in target_effs:
-        # Find index where tpr is closest to and >= target_eff
-        idx = np.where(tpr >= eff)[0]
-        if len(idx) > 0:
-            idx = idx[0]
-            eB = fpr[idx]
-            rej = 1.0 / eB if eB > 0 else np.inf
-            results[f'rej_{int(eff*100)}'] = float(rej)
-        else:
-            results[f'rej_{int(eff*100)}'] = np.nan
+        threshold, tie_probability = score_cut(signal_scores, eff)
+        eB = float(score_cut_weights(background_scores, threshold, tie_probability).mean())
+        results[f'rej_{int(eff*100)}'] = float(1.0 / eB) if eB > 0 else np.inf
             
     return results
 
@@ -69,11 +65,14 @@ def evaluate_mass_sculpting(mjj_bkg, score_bkg, thresholds):
     hist_incl = hist_incl / hist_incl.sum() if hist_incl.sum() else np.zeros_like(hist_incl, dtype=float)
     
     results = {}
-    for name, thresh in thresholds.items():
-        # Apply cut: score >= thresh
-        selected_mjj = mjj_bkg[score_bkg >= thresh]
-        if len(selected_mjj) > 0:
-            hist_cut, _ = np.histogram(selected_mjj, bins=bins)
+    for name, cut in thresholds.items():
+        if isinstance(cut, (tuple, list)):
+            thresh, tie_probability = cut
+            weights = score_cut_weights(score_bkg, thresh, tie_probability)
+        else:
+            weights = (score_bkg >= cut).astype(float)
+        if weights.sum() > 0:
+            hist_cut, _ = np.histogram(mjj_bkg, bins=bins, weights=weights)
             hist_cut = hist_cut / hist_cut.sum() if hist_cut.sum() else np.zeros_like(hist_cut, dtype=float)
             
             jsd = calculate_js_divergence(hist_incl, hist_cut)

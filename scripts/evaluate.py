@@ -22,6 +22,7 @@ from src.models.m4_deep_sad import DeepSAD
 from src.models.m5_supervised import SupervisedMLP
 from src.evaluation.metrics import get_core_metrics, evaluate_mass_sculpting, calculate_score_mjj_dependence
 from src.evaluation.bump_hunt import perform_bump_hunt, bootstrap_null_significances
+from src.evaluation.working_points import score_cut, score_cut_weights
 
 
 def read_rows(dset, indices, cols):
@@ -78,8 +79,7 @@ def score(model, X, name, device):
 
 
 def threshold_at_efficiency(scores, efficiency):
-    if not len(scores): raise ValueError('Empty validation background score array')
-    return float(np.quantile(scores,1-efficiency,method='higher'))
+    return score_cut(scores, efficiency)
 
 
 def save_mass_diagnostics(mjj,scores,thresholds,path):
@@ -88,8 +88,8 @@ def save_mass_diagnostics(mjj,scores,thresholds,path):
     fig,axes=plt.subplots(1,3,figsize=(15,4.2))
     axes[0].step(centers,total/max(total.sum(),1),where='mid',color='#203B53',label='Inclusive background')
     for key,color in (('10pct','#158B8B'),('1pct','#C7832D')):
-        selected=scores>=thresholds[key]
-        passing,_=np.histogram(mjj[selected],bins=edges)
+        selected=score_cut_weights(scores,*thresholds[key])
+        passing,_=np.histogram(mjj,bins=edges,weights=selected)
         norm=passing.sum()
         if norm: axes[0].step(centers,passing/norm,where='mid',color=color,label=f"Score cut, validation εB={key}")
         eff=np.divide(passing,total,out=np.full(len(total),np.nan,dtype=float),where=total>0)
@@ -165,9 +165,11 @@ def _evaluate_model(config):
     thresholds={'10pct':threshold_at_efficiency(sbv,.10),'1pct':threshold_at_efficiency(sbv,.01)}
     metrics.update(evaluate_mass_sculpting(np.asarray(mjj_test[:len(sb)]),sb,thresholds))
     metrics['score_mjj_dependence']=calculate_score_mjj_dependence(np.asarray(mjj_test[:len(sb)]),sb)
-    for key,th in thresholds.items(): metrics[f'validation_threshold_{key}']=th
-    metrics['validation_bkg_eff_at_10pct']=float(np.mean(sbv>=thresholds['10pct']))
-    metrics['validation_bkg_eff_at_1pct']=float(np.mean(sbv>=thresholds['1pct']))
+    for key,(th,tie_probability) in thresholds.items():
+        metrics[f'validation_threshold_{key}']=th
+        metrics[f'validation_tie_acceptance_{key}']=tie_probability
+    metrics['validation_bkg_eff_at_10pct']=float(score_cut_weights(sbv,*thresholds['10pct']).mean())
+    metrics['validation_bkg_eff_at_1pct']=float(score_cut_weights(sbv,*thresholds['1pct']).mean())
     variant=f"f{float(config['data'].get('f_train',0)):g}_k{int(config['data'].get('k_labels',0))}"
     diagnostic_path=os.path.join('reports','figures',f'{name}_{variant}_{seed}_mass_diagnostics.png')
     save_mass_diagnostics(np.asarray(mjj_test[:len(sb)]),sb,thresholds,diagnostic_path)
@@ -179,20 +181,23 @@ def _evaluate_model(config):
     mjj_mix=np.r_[mjj_bkg,np.asarray(mjj_test[len(sb):])[chosen]]
     score_mix=np.r_[sb,ss[chosen]]
     metrics.update(perform_bump_hunt(mjj_mix,prefix='pre_cut_'))
-    post10=mjj_mix[score_mix>=thresholds['10pct']]
-    post1=mjj_mix[score_mix>=thresholds['1pct']]
-    metrics.update(perform_bump_hunt(post10,prefix='at_10pct_bkg_'))
-    metrics.update(perform_bump_hunt(post1,prefix='at_1pct_bkg_'))
+    keep10=score_cut_weights(score_mix,*thresholds['10pct'])
+    keep1=score_cut_weights(score_mix,*thresholds['1pct'])
+    post10=mjj_mix[keep10>0]
+    post1=mjj_mix[keep1>0]
+    metrics.update(perform_bump_hunt(mjj_mix,prefix='at_10pct_bkg_',weights=keep10))
+    metrics.update(perform_bump_hunt(mjj_mix,prefix='at_1pct_bkg_',weights=keep1))
     null_pre=perform_bump_hunt(mjj_bkg,prefix='null_pre_cut_')
     metrics.update(null_pre)
     z_pre=null_pre['null_pre_cut_local_significance']
     pre_boot=bootstrap_null_significances(mjj_bkg,n_trials=50,seed=seed,observed_z=z_pre)
     for key,value in pre_boot.items(): metrics[f'null_pre_bootstrap_{key}']=value
-    post_null=mjj_bkg[sb>=thresholds['1pct']]
-    null_post=perform_bump_hunt(post_null,prefix='null_at_1pct_bkg_')
+    null_keep=score_cut_weights(sb,*thresholds['1pct'])
+    post_null=mjj_bkg[null_keep>0]
+    null_post=perform_bump_hunt(mjj_bkg,prefix='null_at_1pct_bkg_',weights=null_keep)
     metrics.update(null_post)
     z_post=null_post['null_at_1pct_bkg_local_significance']
-    post_boot=bootstrap_null_significances(post_null,n_trials=50,seed=seed+1,observed_z=z_post)
+    post_boot=bootstrap_null_significances(mjj_bkg,n_trials=50,seed=seed+1,observed_z=z_post,base_weights=null_keep)
     for key,value in post_boot.items(): metrics[f'null_at_1pct_bootstrap_{key}']=value
 
     # Held-out 3-prong signals are scored against the unchanged 2-prong background test sample.
@@ -205,16 +210,16 @@ def _evaluate_model(config):
         metrics['roc_auc_3prong']=float(roc_auc_score(np.r_[np.zeros(len(sb)),np.ones(len(s3))],np.r_[sb,s3]))
         metrics['n_test_signal_3prong']=int(len(s3))
         for e in (.01,.05,.10,.30,.50):
-            cut=np.quantile(s3,1-e,method='higher') if len(s3) else np.inf
-            eb=float(np.mean(sb>=cut))
+            cut,tie_probability=score_cut(s3,e) if len(s3) else (np.inf,0.)
+            eb=float(score_cut_weights(sb,cut,tie_probability).mean())
             metrics[f'rej_{int(e*100)}_3prong']=float(1/eb) if eb else float('inf')
         metrics['3prong_mjj_median']=float(np.nanmedian(m3))
 
     os.makedirs('reports',exist_ok=True)
     root_path=os.path.join('reports',f'{name}_{seed}_spectra.root')
     with uproot.recreate(root_path) as fout:
-        for key,values in [('inclusive',mjj_mix),('at_10pct_bkg',post10),('at_1pct_bkg',post1)]:
-            fout[key]=np.histogram(values,bins=40,range=(2500,4500))
+        for key,values,weights in [('inclusive',mjj_mix,None),('at_10pct_bkg',mjj_mix,keep10),('at_1pct_bkg',mjj_mix,keep1)]:
+            fout[key]=np.histogram(values,bins=40,range=(2500,4500),weights=weights)
     mlflow.log_artifact(root_path)
     mlflow.log_artifact(diagnostic_path)
     results_path='reports/tables/results.csv'; os.makedirs(os.path.dirname(results_path),exist_ok=True)

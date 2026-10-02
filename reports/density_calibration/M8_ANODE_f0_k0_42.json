@@ -1,0 +1,168 @@
+{
+  "diagnostic": "heldout_gmm_nll",
+  "n": 64056,
+  "mean_nll_nats": 5.8920811723616735,
+  "std_nll_nats": 1.9159457118186851,
+  "median_nll_nats": 5.641460621783564,
+  "q90_nll_nats": 8.335742395558121,
+  "q99_nll_nats": 11.780473913546556,
+  "conformal_score_calibration": {
+    "diagnostic": "split_conformal_upper_tail_density_score",
+    "calibration_events": 64056,
+    "evaluation_events": 64056,
+    "calibration_method": "finite-sample upper-tail rank p-value with ties counted conservatively",
+    "p_value_mean": 0.49952511642427927,
+    "p_value_quantiles": {
+      "0.01": 0.009500132694319123,
+      "0.05": 0.05032627191407652,
+      "0.1": 0.10148773748380349,
+      "0.5": 0.5013035265466693,
+      "0.9": 0.8978253742760354,
+      "0.95": 0.9486082707588553,
+      "0.99": 0.9893532322775028
+    },
+    "uniform_ks_statistic": 0.004337330707900544,
+    "uniform_ks_pvalue": 0.17896530182498083,
+    "uniform_bin_counts": [
+      6321,
+      6521,
+      6407,
+      6146,
+      6561,
+      6576,
+      6450,
+      6408,
+      6400,
+      6266
+    ],
+    "tail_coverage": {
+      "0.01": {
+        "n_flagged": 675,
+        "observed_rate": 0.010537654552266766,
+        "nominal_rate": 0.01
+      },
+      "0.05": {
+        "n_flagged": 3187,
+        "observed_rate": 0.04975334082677657,
+        "nominal_rate": 0.05
+      },
+      "0.1": {
+        "n_flagged": 6321,
+        "observed_rate": 0.09867928062944924,
+        "nominal_rate": 0.1
+      }
+    },
+    "interpretation": "calibrated anomaly-score p-values for exchangeable held-out sideband background; not an absolute density or a signal-region conditional density"
+  },
+  "rosenblatt_pit": {
+    "diagnostic": "heldout_gmm_rosenblatt_pit",
+    "n": 64056,
+    "feature_order_sensitive": true,
+    "marginals": [
+      {
+        "feature_index": 0,
+        "mean": 0.4948443776525303,
+        "std": 0.2879862274949665,
+        "ks_statistic": 0.029011562001511983,
+        "ks_pvalue": 2.8501653217494666e-47,
+        "uniform_bin_counts": [
+          6367,
+          7821,
+          6051,
+          5674,
+          5914,
+          6765,
+          6998,
+          6289,
+          5953,
+          6224
+        ]
+      },
+      {
+        "feature_index": 1,
+        "mean": 0.49652879062769195,
+        "std": 0.2896069389669346,
+        "ks_statistic": 0.0280253225343072,
+        "ks_pvalue": 3.85519563073321e-44,
+        "uniform_bin_counts": [
+          6489,
+          8098,
+          5843,
+          5317,
+          5591,
+          6524,
+          7010,
+          6868,
+          6442,
+          5874
+        ]
+      },
+      {
+        "feature_index": 2,
+        "mean": 0.5061946759417725,
+        "std": 0.29514047269455196,
+        "ks_statistic": 0.032898521441935835,
+        "ks_pvalue": 1.1458876211979249e-60,
+        "uniform_bin_counts": [
+          7457,
+          6358,
+          5579,
+          5460,
+          5634,
+          5919,
+          6569,
+          7358,
+          7754,
+          5968
+        ]
+      },
+      {
+        "feature_index": 3,
+        "mean": 0.5043327557326763,
+        "std": 0.29489512228112985,
+        "ks_statistic": 0.026249636641222485,
+        "ks_pvalue": 8.921961056666738e-39,
+        "uniform_bin_counts": [
+          7480,
+          6417,
+          5611,
+          5513,
+          5712,
+          6031,
+          6624,
+          6962,
+          7616,
+          6090
+        ]
+      },
+      {
+        "feature_index": 4,
+        "mean": 0.4926050008396297,
+        "std": 0.2825284241892446,
+        "ks_statistic": 0.0519328577637555,
+        "ks_pvalue": 1.376069851662675e-150,
+        "uniform_bin_counts": [
+          5015,
+          5014,
+          8961,
+          9395,
+          6924,
+          5693,
+          5340,
+          5199,
+          5255,
+          7260
+        ]
+      }
+    ]
+  },
+  "heldout_region": "independent background test events in the 2.5-3.3 and 3.7-4.5 TeV sidebands",
+  "calibration_split": "independent deterministic half-split of held-out sideband events; one half calibrates the NLL tail, the other evaluates it",
+  "model_semantics": "held-out calibration diagnostics for sideband GMM density; not conditional SR background density",
+  "model": "M8_ANODE",
+  "seed": 42,
+  "pseudo_random_seed": 2026,
+  "test_background_events_in_window": 24157,
+  "test_background_events_for_density_diagnostic": 64056,
+  "density_calibration_claim": false
+}

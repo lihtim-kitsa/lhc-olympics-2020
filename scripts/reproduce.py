@@ -35,6 +35,7 @@ def run_grid():
     if not verified: subprocess.run([sys.executable,'scripts/download_data.py'],check=True)
     else: print('Using all four checksum-verified files recorded in data/manifest.yaml.',flush=True)
     subprocess.run([sys.executable,'scripts/build_features.py'],check=True)
+    subprocess.run([sys.executable,'scripts/build_extended_features.py'],check=True)
     subprocess.run([sys.executable,'src/data/make_dataset.py'],check=True)
     grid=[]
     for seed in [42, 43, 44, 45, 46]:

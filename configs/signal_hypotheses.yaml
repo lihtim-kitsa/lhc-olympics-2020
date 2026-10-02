@@ -1,0 +1,57 @@
+# Current local LHCO R&D samples and optional external signal models.
+# The additional archives come from Zenodo record 18983506 and are not
+# interchangeable with the original R&D generation; analyze as external tests.
+schema_version: 1
+primary_training_hypothesis: lhco_2prong
+hypotheses:
+  - id: lhco_2prong
+    name: "W' -> XY -> 4q (2+2 prong)"
+    role: development_signal
+    source: data/processed/events_v2_features.h5
+    split_indices: data/splits/signal2_test.npy
+    topology: "2+2 prong"
+    masses_gev: {resonance: 3500, x: 500, y: 100}
+    generation: "Original LHCO 2020 R&D v5"
+  - id: lhco_3prong
+    name: "Z' -> XY -> qqq (held-out 3-prong)"
+    role: held_out_topology
+    source: data/processed/events_Z_XY_qqq_features.h5
+    split_indices: data/splits/signal3_test.npy
+    topology: "3-prong"
+    generation: "Original LHCO 2020 R&D v5"
+  - id: xtowrto3w
+    name: "W_KK -> W R -> 3W (2+4 prong)"
+    role: external_signal_hypothesis
+    topology: "2+4 prong"
+    archive: data/external_signals/XtoWRto3W.tar.gz
+    url: https://zenodo.org/records/18983506/files/XtoWRto3W.tar.gz?download=1
+    source_record: https://zenodo.org/records/18983506
+    archive_md5: cfb1058c63036d4384802d4a70554df1
+    generation: "MadGraph5_aMC@NLO 3.6.2, Pythia 8.313, Delphes 3.5.0"
+  - id: xtoyyprime
+    name: "X -> Y Y' -> 4q (2+2 prong, mixed vector/scalar)"
+    role: external_signal_hypothesis
+    topology: "2+2 prong"
+    archive: data/external_signals/XtoYYprime.tar.gz
+    url: https://zenodo.org/records/18983506/files/XtoYYprime.tar.gz?download=1
+    source_record: https://zenodo.org/records/18983506
+    archive_md5: c75e84491ff7dc3695bb0986d31211c7
+    generation: "MadGraph5_aMC@NLO 3.6.2, Pythia 8.313, Delphes 3.5.0"
+  - id: ytohhto4t
+    name: "G_KK -> H H -> 4t (6+6 prong)"
+    role: external_signal_hypothesis
+    topology: "6+6 prong"
+    archive: data/external_signals/YtoHHto4T.tar.gz
+    url: https://zenodo.org/records/18983506/files/YtoHHto4T.tar.gz?download=1
+    source_record: https://zenodo.org/records/18983506
+    archive_md5: 68eddfa8f72ee62081171bb0c08d4114
+    generation: "MadGraph5_aMC@NLO 3.6.2, Pythia 8.313, Delphes 3.5.0"
+  - id: zptotptp
+    name: "Z' -> T' T' -> t Z t Z (5+5 prong)"
+    role: external_signal_hypothesis
+    topology: "5+5 prong"
+    archive: data/external_signals/ZpToTpTp.tar.gz
+    url: https://zenodo.org/records/18983506/files/ZpToTpTp.tar.gz?download=1
+    source_record: https://zenodo.org/records/18983506
+    archive_md5: 8035526a5c28fbe8041cbef40ce156c2
+    generation: "MadGraph5_aMC@NLO 3.6.2, Pythia 8.313, Delphes 3.5.0"

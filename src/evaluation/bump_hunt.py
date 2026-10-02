@@ -32,8 +32,20 @@ class BumpHunter:
             return design.T@(mu-y)
         bounds=[(-50,50),(-20,60),(-20,60),(-20,20)]
         fit=minimize(objective,theta,jac=gradient,bounds=bounds,method='L-BFGS-B',options={'maxiter':5000,'ftol':1e-12})
-        if not fit.success and not np.isfinite(fit.fun): return np.nan,np.nan,np.nan,np.nan
+        # A finite parameter vector from a failed fit is not a valid closure
+        # result; accepting it can create absurd expected yields and Z values.
+        if not fit.success or not np.isfinite(fit.fun): return np.nan,np.nan,np.nan,np.nan
         theta=fit.x
+        sideband_expected=np.exp(np.clip(design@theta,-50,50))
+        observed_sideband=float(y.sum())
+        fitted_sideband=float(sideband_expected.sum())
+        # Reject numerically converged but saturated fits whose sideband yield
+        # is inconsistent with the observed sidebands; these otherwise predict
+        # ~0 events in the window and produce spurious enormous local Z values.
+        if (observed_sideband <= 0 or not np.isfinite(fitted_sideband)
+                or fitted_sideband < 0.5 * observed_sideband
+                or fitted_sideband > 2.0 * observed_sideband):
+            return np.nan,np.nan,np.nan,np.nan
         design_sig=self.basis(self.centers[self.signal])
         mu_sig=np.exp(np.clip(design_sig@theta,-50,50))
         b=float(mu_sig.sum()); n=float(counts[self.signal].sum())
@@ -61,13 +73,20 @@ def perform_bump_hunt(mjj_data,prefix='',weights=None):
         f'{prefix}local_significance':float(significance),f'{prefix}expected_bkg_uncertainty':float(uncertainty)}
 
 
-def bootstrap_null_significances(mjj_data,n_trials=50,seed=42,observed_z=None):
+def bootstrap_null_significances(mjj_data,n_trials=50,seed=42,observed_z=None,base_weights=None):
     """Poisson bootstrap the background-only events and refit each pseudoexperiment."""
     data=np.asarray(mjj_data,dtype=float)
+    base=np.ones(len(data),dtype=float) if base_weights is None else np.asarray(base_weights,dtype=float)
+    if base.shape != data.shape or np.any(~np.isfinite(base)) or np.any(base < 0):
+        raise ValueError('base_weights must be finite, non-negative, and align with mjj_data')
     rng=np.random.default_rng(seed); values=[]
     hunter=BumpHunter()
     for _ in range(n_trials):
-        weights=rng.poisson(1.0,size=len(data))
+        # Fractional base weights represent randomized acceptance of tied
+        # boundary scores. Draw that Bernoulli decision per pseudoexperiment
+        # before Poisson event multiplicities to preserve its variance.
+        acceptance = rng.binomial(1, np.clip(base, 0., 1.))
+        weights=rng.poisson(1.0,size=len(data))*acceptance
         _,_,z,_=hunter.fit_background(data,weights=weights)
         if np.isfinite(z): values.append(float(z))
     if not values: return {'mean':np.nan,'median':np.nan,'q95':np.nan,'n':0,'pvalue':np.nan}

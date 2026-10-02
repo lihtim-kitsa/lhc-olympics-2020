@@ -1,0 +1,69 @@
+{
+  "diagnostic": "heldout_real_vs_generated_classifier_calibration",
+  "n": 48314,
+  "n_real": 24157,
+  "n_generated": 24157,
+  "brier": 0.00869071931704615,
+  "log_loss": 0.03519656926346114,
+  "ece_quantile_bins": 0.0033800898064893364,
+  "calibration_intercept": 0.5589554286306306,
+  "calibration_slope": 1.171887922722241,
+  "reliability_bins": [
+    {
+      "n": 4832,
+      "mean_probability": 0.0009714144494685552,
+      "observed_real_fraction": 0.0026903973509933773,
+      "lower_edge": 4.542666647466831e-05,
+      "upper_edge": 0.0016724535380490124
+    },
+    {
+      "n": 4831,
+      "mean_probability": 0.0024068214829095036,
+      "observed_real_fraction": 0.001448975367418754,
+      "lower_edge": 0.0016724535380490124,
+      "upper_edge": 0.003260483732447028
+    },
+    {
+      "n": 4831,
+      "mean_probability": 0.004587010179533151,
+      "observed_real_fraction": 0.00310494721589733,
+      "lower_edge": 0.003260483732447028,
+      "upper_edge": 0.006284555187448862
+    },
+    {
+      "n": 4832,
+      "mean_probability": 0.009538870011857211,
+      "observed_real_fraction": 0.004552980132450331,
+      "lower_edge": 0.006284555187448862,
+      "upper_edge": 0.014378499612212181
+    },
+    {
+      "n": 4831,
+      "mean_probability": 0.0431639849555493,
+      "observed_real_fraction": 0.04574622231422066,
+      "lower_edge": 0.014378499612212181,
+      "upper_edge": 0.20100419223308563
+    },
+    {
+      "n": 24157,
+      "mean_probability": 0.9840772561082808,
+      "observed_real_fraction": 0.9884919485035394,
+      "lower_edge": 0.20100419223308563,
+      "upper_edge": 1.0
+    }
+  ],
+  "interpretation": "classifier calibration for the held-out real/generated sampling mixture; not absolute background-density calibration",
+  "implied_log_real_to_generated_density_ratio": {
+    "mean": 12.668749048813662,
+    "median": -1.3800331658241545,
+    "q90": 36.04365338911715
+  },
+  "density_ratio_caveat": "prior-corrected classifier proxy; generated distribution must match target background for a background likelihood ratio interpretation",
+  "heldout_region": "background test events in 3.3-3.7 TeV window versus independent CVAE draws at their masses",
+  "model_semantics": "real-vs-generated classifier calibration; not absolute or calibrated background density",
+  "model": "M11_CATHODE_CVAE",
+  "seed": 42,
+  "pseudo_random_seed": 2026,
+  "test_background_events_in_window": 24157,
+  "density_calibration_claim": false
+}

@@ -1,0 +1,81 @@
+{
+  "protocol": "background-only Deep Sets autoencoder; event-level 60/20/20 class split, signal train/validation portions unused",
+  "seed": 42,
+  "threshold_quantile": 0.99,
+  "threshold_from_validation_background": 0.0002441368851577863,
+  "tie_acceptance_probability": 0.8400000000017371,
+  "split_source": "existing_shared_split_files",
+  "max_train_events": 50000,
+  "max_eval_events_per_pool": null,
+  "max_hypothesis_events": null,
+  "split_counts": {
+    "train": 599952,
+    "validation": 199984,
+    "test_background": 199984,
+    "test_signal2": 19996,
+    "train_used": 50000,
+    "validation_used": 199984,
+    "test_background_used": 199984,
+    "test_signal2_used": 19996,
+    "background_train_before_cap": 599952,
+    "background_train_used": 50000
+  },
+  "validation_background_exceedance_fraction": 0.010000000000000009,
+  "test_background_false_positive_fraction": 0.009990799263941115,
+  "test_2prong_signal_efficiency_at_threshold": 0.0016003200640128026,
+  "test_2prong_roc_auc": 0.49804158555028877,
+  "best_validation_background_mse": 9.031334369334466e-05,
+  "training_history": [
+    {
+      "epoch": 1,
+      "train_background_mse": 0.22013172632370087,
+      "validation_background_mse": 0.0019455405500600391
+    },
+    {
+      "epoch": 2,
+      "train_background_mse": 0.0011939222661102823,
+      "validation_background_mse": 0.000872967670370726
+    },
+    {
+      "epoch": 3,
+      "train_background_mse": 0.0005065520708271814,
+      "validation_background_mse": 0.000313581515718709
+    },
+    {
+      "epoch": 4,
+      "train_background_mse": 0.00025833017967717296,
+      "validation_background_mse": 0.0001810013581499464
+    },
+    {
+      "epoch": 5,
+      "train_background_mse": 0.0001650413143790283,
+      "validation_background_mse": 9.794278406413907e-05
+    },
+    {
+      "epoch": 6,
+      "train_background_mse": 0.00013373441348534852,
+      "validation_background_mse": 9.54748007721252e-05
+    },
+    {
+      "epoch": 7,
+      "train_background_mse": 0.00011268176326920156,
+      "validation_background_mse": 0.00017909103200884594
+    },
+    {
+      "epoch": 8,
+      "train_background_mse": 0.00010737256888334405,
+      "validation_background_mse": 9.031334369334466e-05
+    }
+  ],
+  "signal_hypotheses": {
+    "lhco_3prong": {
+      "status": "evaluated",
+      "events": 100000,
+      "available_events": 100000,
+      "source": "data\\raw\\events_anomalydetection_Z_XY_qqq.h5",
+      "signal_efficiency_at_validation_background_threshold": 0.00098,
+      "roc_auc_vs_2prong_test_background": 0.440881561424914
+    }
+  },
+  "checkpoint": "particle_deepsets.pt"
+}

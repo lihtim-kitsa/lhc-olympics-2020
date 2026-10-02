@@ -1,0 +1,84 @@
+{
+  "model": "M1_Autoencoder",
+  "variant": "f0_k0",
+  "model_seed": 42,
+  "pseudoexperiment_seed": 42,
+  "n_validation_background": 199984,
+  "n_test_background": 199984,
+  "trials": 500,
+  "thresholds": {
+    "10pct": [
+      1.7812855730880983e-05,
+      0.4000000000014552
+    ],
+    "1pct": [
+      7.048434054013342e-05,
+      0.8400000000001455
+    ]
+  },
+  "validation_efficiency": {
+    "10pct": 0.1,
+    "1pct": 0.01
+  },
+  "stages": {
+    "post_10pct": {
+      "valid_trials": 500,
+      "median_local_significance": 0.18190271636336186,
+      "q95_local_significance": 2.100211389104486,
+      "fraction_z_ge_3": 0.006,
+      "fraction_z_ge_5": 0.0,
+      "observed_test_local_significance": 0.1585164689364248,
+      "bootstrap_tail_probability": 0.5069860279441117
+    },
+    "post_1pct": {
+      "valid_trials": 461,
+      "median_local_significance": 0.344453370611903,
+      "q95_local_significance": 1.8586609735295558,
+      "fraction_z_ge_3": 0.0,
+      "fraction_z_ge_5": 0.0,
+      "observed_test_local_significance": 0.394426779008977,
+      "bootstrap_tail_probability": 0.4805194805194805
+    },
+    "pre_cut": {
+      "valid_trials": 499,
+      "median_local_significance": 0.0,
+      "q95_local_significance": 0.0,
+      "fraction_z_ge_3": 0.0,
+      "fraction_z_ge_5": 0.0,
+      "observed_test_local_significance": 0.0,
+      "bootstrap_tail_probability": 1.0
+    }
+  },
+  "reference_observed_test": [
+    {
+      "stage": "pre_cut",
+      "n_events": 199984.0,
+      "threshold": null,
+      "tie_acceptance": null,
+      "observed": 24157.0,
+      "expected_background": 24828.453478013635,
+      "local_significance": 0.0,
+      "expected_background_uncertainty": 159.15202800027006
+    },
+    {
+      "stage": "post_10pct",
+      "n_events": 19900.0,
+      "threshold": 1.7812855730880983e-05,
+      "tie_acceptance": 0.4000000000014552,
+      "observed": 2720.0,
+      "expected_background": 2708.936296858581,
+      "local_significance": 0.1585164689364248,
+      "expected_background_uncertainty": 46.39935393608181
+    },
+    {
+      "stage": "post_1pct",
+      "n_events": 1993.0,
+      "threshold": 7.048434054013342e-05,
+      "tie_acceptance": 0.8400000000001455,
+      "observed": 157.0,
+      "expected_background": 150.5600385732199,
+      "local_significance": 0.394426779008977,
+      "expected_background_uncertainty": 10.52325840072245
+    }
+  ]
+}

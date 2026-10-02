@@ -1,0 +1,84 @@
+{
+  "model": "M11_CATHODE_CVAE",
+  "variant": "f0_k0",
+  "model_seed": 42,
+  "pseudoexperiment_seed": 42,
+  "n_validation_background": 199984,
+  "n_test_background": 199984,
+  "trials": 500,
+  "thresholds": {
+    "10pct": [
+      1.0,
+      0.11755604933046475
+    ],
+    "1pct": [
+      1.0,
+      0.011755604933046475
+    ]
+  },
+  "validation_efficiency": {
+    "10pct": 0.1,
+    "1pct": 0.01
+  },
+  "stages": {
+    "post_10pct": {
+      "valid_trials": 494,
+      "median_local_significance": 0.0,
+      "q95_local_significance": 0.8023267568550634,
+      "fraction_z_ge_3": 0.008097165991902834,
+      "fraction_z_ge_5": 0.008097165991902834,
+      "observed_test_local_significance": 0.0,
+      "bootstrap_tail_probability": 1.0
+    },
+    "post_1pct": {
+      "valid_trials": 456,
+      "median_local_significance": 0.0,
+      "q95_local_significance": 1.5111338580047686,
+      "fraction_z_ge_3": 0.0021929824561403508,
+      "fraction_z_ge_5": 0.0,
+      "observed_test_local_significance": 0.0,
+      "bootstrap_tail_probability": 1.0
+    },
+    "pre_cut": {
+      "valid_trials": 500,
+      "median_local_significance": 0.0,
+      "q95_local_significance": 0.0,
+      "fraction_z_ge_3": 0.0,
+      "fraction_z_ge_5": 0.0,
+      "observed_test_local_significance": 0.0,
+      "bootstrap_tail_probability": 1.0
+    }
+  },
+  "reference_observed_test": [
+    {
+      "stage": "pre_cut",
+      "n_events": 199984.0,
+      "threshold": null,
+      "tie_acceptance": null,
+      "observed": 24157.0,
+      "expected_background": 24828.453478013635,
+      "local_significance": 0.0,
+      "expected_background_uncertainty": 159.15202800027006
+    },
+    {
+      "stage": "post_10pct",
+      "n_events": 20027.553900233957,
+      "threshold": 1.0,
+      "tie_acceptance": 0.11755604933046475,
+      "observed": 2291.167401446317,
+      "expected_background": 2369.4332701125622,
+      "local_significance": 0.0,
+      "expected_background_uncertainty": 49.00623396271122
+    },
+    {
+      "stage": "post_1pct",
+      "n_events": 2002.7553900233956,
+      "threshold": 1.0,
+      "tie_acceptance": 0.011755604933046475,
+      "observed": 229.11674014452774,
+      "expected_background": 236.9433284816009,
+      "local_significance": 0.0,
+      "expected_background_uncertainty": 15.49713199585936
+    }
+  ]
+}
