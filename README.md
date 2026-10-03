@@ -26,6 +26,15 @@ The reproduction command verifies the four official Zenodo files, builds the fea
 
 For a containerized run, build and run the included Docker image. Raw data are downloaded at runtime and are not included in the image.
 
+For quick verification using cached features and frozen splits, run `make reproduce-fast`
+or `python scripts/reproduce_fast.py`. This seeded Isolation Forest demo samples up to
+2,000 events per split, fits scaling on training background, and calibrates its cut
+on validation background. It writes metrics, versions, runtime and scores under
+`output/reproduce_fast/`; its results are separate from the full benchmark.
+Run `python -m pytest tests/ -q -p no:cacheprovider` for protocol checks.
+Release acceptance and outstanding requirements are recorded in
+[reports/release_status.md](reports/release_status.md).
+
 ## Outputs
 
 - `data/manifest.yaml`: Zenodo checksums, SHA256 digests, file sizes, and schema version

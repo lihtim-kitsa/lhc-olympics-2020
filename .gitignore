@@ -14,6 +14,9 @@ output/pdf/
 output/particle_deepsets_pilot/
 output/particle_deepsets_capped/
 tmp/
+build/
+*.egg-info/
+output/reproduce_fast/
 temp_train.log
 reports/*.aux
 reports/*.bbl

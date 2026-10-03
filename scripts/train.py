@@ -53,7 +53,7 @@ def load_data(split_dir, features_file, config):
     bkg_val_idx = np.load(os.path.join(split_dir, 'background_val.npy'))
     sig_val_idx = np.load(os.path.join(split_dir, sig_val_file))
     cols = [0, 1, 2, 3, 4, 5] if data.get('use_mjj', False) else [0, 1, 2, 3, 4]
-    f2 = 'data/processed/events_v2_features.h5'
+    f2 = features_file
     
     if data.get('use_extended', False):
         cols = [0, 1, 2, 3, 4, 5, 6, 7] if data.get('use_mjj', False) else [0, 1, 2, 3, 4, 5, 6]

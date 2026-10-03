@@ -1,4 +1,4 @@
-.PHONY: all setup data features splits train evaluate reproduce report test
+.PHONY: all setup data features splits train evaluate reproduce reproduce-fast report test
 
 all: reproduce
 
@@ -23,6 +23,12 @@ evaluate:
 
 reproduce:
 	python scripts/reproduce.py
+
+reproduce-fast:
+	python scripts/reproduce_fast.py
+
+report:
+	python scripts/build_report.py
 
 test:
 	python -m pytest tests/
