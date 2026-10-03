@@ -1,0 +1,378 @@
+[
+  {
+    "index": 1,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 2,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.1,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 3,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.5,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 4,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 1.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 5,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 6,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.1,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 7,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.5,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 8,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 1.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 9,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 10,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.1,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 11,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.5,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 12,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 1.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 13,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.0,
+    "k_labels": 10,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 14,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.0,
+    "k_labels": 100,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 15,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 16,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 10,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 17,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 100,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 18,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 1000,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 19,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 1.0,
+    "k_labels": 10,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 20,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 1.0,
+    "k_labels": 100,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 21,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 1.0,
+    "k_labels": 1000,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 22,
+    "model": "M5_Supervised",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 23,
+    "model": "M6_MassAware",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 42,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 24,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 25,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 26,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 27,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 100,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 28,
+    "model": "M5_Supervised",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 29,
+    "model": "M6_MassAware",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 43,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 30,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 31,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 32,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 33,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 100,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 34,
+    "model": "M5_Supervised",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 35,
+    "model": "M6_MassAware",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 44,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 36,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 37,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 38,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 39,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 100,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 40,
+    "model": "M5_Supervised",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 41,
+    "model": "M6_MassAware",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 45,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 42,
+    "model": "M1_Autoencoder",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 46,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 43,
+    "model": "M2_IsolationForest",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 46,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 44,
+    "model": "M3_DeepSVDD",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 46,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 45,
+    "model": "M4_DeepSAD",
+    "f_train_percent": 0.5,
+    "k_labels": 100,
+    "seed": 46,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 46,
+    "model": "M5_Supervised",
+    "f_train_percent": 0.0,
+    "k_labels": 1000,
+    "seed": 46,
+    "status": "already completed; retained"
+  },
+  {
+    "index": 47,
+    "model": "M6_MassAware",
+    "f_train_percent": 0.0,
+    "k_labels": 0,
+    "seed": 46,
+    "status": "already completed; retained"
+  }
+]

@@ -1,0 +1,160 @@
+{
+  "method": "stratified paired event bootstrap; percentile 95% intervals",
+  "scope": "frozen final seed-42 headline detectors, 2-prong test AUC only",
+  "trials": 500,
+  "bootstrap_seed": 20261003,
+  "n_background": 199984,
+  "n_signal": 19996,
+  "limitations": "Conditional on the fitted detectors; separate from training-seed variance. No intervals for other metrics or global discovery claims.",
+  "models": {
+    "M1_Autoencoder": {
+      "auc": 0.7943987210565162,
+      "ci95": [
+        0.7910724570589422,
+        0.7976011965046521
+      ]
+    },
+    "M2_IsolationForest": {
+      "auc": 0.8165353815922798,
+      "ci95": [
+        0.8136660084418326,
+        0.8193713204535359
+      ]
+    },
+    "M3_DeepSVDD": {
+      "auc": 0.512286268458588,
+      "ci95": [
+        0.5084365535187504,
+        0.5161414787839208
+      ]
+    },
+    "M4_DeepSAD": {
+      "auc": 0.8761809568990364,
+      "ci95": [
+        0.873460598273397,
+        0.8787495965114047
+      ]
+    },
+    "M5_Supervised": {
+      "auc": 0.9659333636368845,
+      "ci95": [
+        0.964557441328778,
+        0.9672567767651358
+      ]
+    },
+    "M6_MassAware": {
+      "auc": 0.5278034497710806,
+      "ci95": [
+        0.5239076609312882,
+        0.5314474261324083
+      ]
+    }
+  },
+  "paired_differences": {
+    "M1_Autoencoder minus M2_IsolationForest": {
+      "difference": -0.022136660535763575,
+      "ci95": [
+        -0.02420181764983784,
+        -0.020206024610469577
+      ]
+    },
+    "M1_Autoencoder minus M3_DeepSVDD": {
+      "difference": 0.28211245259792816,
+      "ci95": [
+        0.2772596099014937,
+        0.2871234071600303
+      ]
+    },
+    "M1_Autoencoder minus M4_DeepSAD": {
+      "difference": -0.0817822358425202,
+      "ci95": [
+        -0.08568719179270685,
+        -0.07845034091212495
+      ]
+    },
+    "M1_Autoencoder minus M5_Supervised": {
+      "difference": -0.17153464258036832,
+      "ci95": [
+        -0.17440187965462325,
+        -0.1687294928895872
+      ]
+    },
+    "M1_Autoencoder minus M6_MassAware": {
+      "difference": 0.2665952712854356,
+      "ci95": [
+        0.26207477539703977,
+        0.271568783023521
+      ]
+    },
+    "M2_IsolationForest minus M3_DeepSVDD": {
+      "difference": 0.30424911313369174,
+      "ci95": [
+        0.2994374884276349,
+        0.30878519780544733
+      ]
+    },
+    "M2_IsolationForest minus M4_DeepSAD": {
+      "difference": -0.059645575306756626,
+      "ci95": [
+        -0.06251653839923718,
+        -0.05695771484570831
+      ]
+    },
+    "M2_IsolationForest minus M5_Supervised": {
+      "difference": -0.14939798204460475,
+      "ci95": [
+        -0.15172605468331946,
+        -0.14707701879015397
+      ]
+    },
+    "M2_IsolationForest minus M6_MassAware": {
+      "difference": 0.28873193182119916,
+      "ci95": [
+        0.28373605812524816,
+        0.2939130694787199
+      ]
+    },
+    "M3_DeepSVDD minus M4_DeepSAD": {
+      "difference": -0.36389468844044837,
+      "ci95": [
+        -0.36875761951771807,
+        -0.35909581641118704
+      ]
+    },
+    "M3_DeepSVDD minus M5_Supervised": {
+      "difference": -0.4536470951782965,
+      "ci95": [
+        -0.45775489270212827,
+        -0.449575783769993
+      ]
+    },
+    "M3_DeepSVDD minus M6_MassAware": {
+      "difference": -0.015517181312492578,
+      "ci95": [
+        -0.017996460764820758,
+        -0.013276246045847933
+      ]
+    },
+    "M4_DeepSAD minus M5_Supervised": {
+      "difference": -0.08975240673784812,
+      "ci95": [
+        -0.09238840749463398,
+        -0.0874038805224592
+      ]
+    },
+    "M4_DeepSAD minus M6_MassAware": {
+      "difference": 0.3483775071279558,
+      "ci95": [
+        0.34310657127212607,
+        0.3532667237835168
+      ]
+    },
+    "M5_Supervised minus M6_MassAware": {
+      "difference": 0.4381299138658039,
+      "ci95": [
+        0.43402633599840823,
+        0.4420865863270362
+      ]
+    }
+  }
+}

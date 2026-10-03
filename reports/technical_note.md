@@ -2,24 +2,24 @@
 
 ## Status and scope
 
-The simulation-only benchmark contains 35 unique result configurations over seeds 42, 43, 44. The full contamination/label-budget matrix is seed 42; repeated seeds 43 and 44 cover six headline configurations. No discovery or real-data sensitivity claim is made.
+The simulation-only benchmark contains 52 unique result configurations over seeds 42--46. The contamination/label-budget matrix is seed 42; five seeds cover the six core headline configurations. Supplemental baselines remain exploratory single-seed evaluations. The frozen reproduction schedule has 47 core runs; the table also contains five supplemental baselines. No discovery or real-data sensitivity claim is made.
 
 ## Methods and data
 
 M1 is an MLP autoencoder; M2 Isolation Forest; M3 Deep SVDD; M4 Deep SAD; M5 a supervised MLP reference; M6 a mass-aware Deep SVDD leakage control. Inputs are mJ1, dmJ, tau21 for each leading jet, and dRJJ. mJJ is excluded from M1–M5 and included only in M6. Official Zenodo v5 high-level features are canonical; raw anti-kT/exclusive-kT validation is a deterministic 128-event check. The local tau axes do not exactly reproduce the supplied FastJet-contrib convention.
 
-## Measured seed-42 headline results
+## Final core results
 
-| Model | f_train | k | 2-prong AUC | 3-prong AUC | JSD at 10% |
-|---|---:|---:|---:|---:|---:|
-| M1_Autoencoder | 0% | 0 | 0.6541 | 0.5894 | 0.1375 |
-| M2_IsolationForest | 0% | 0 | 0.8165 | 0.7144 | 0.0232 |
-| M3_DeepSVDD | 0% | 0 | 0.4830 | 0.6224 | 0.0011 |
-| M4_DeepSAD | 50% | 100 | 0.9335 | 0.8324 | 0.0149 |
-| M5_Supervised | 0% | 1000 | 0.9659 | 0.9275 | 0.0070 |
-| M6_MassAware | 0% | 0 | 0.5395 | 0.6651 | 0.0259 |
+| Model | 2-prong AUC | Held-out 3-prong AUC |
+|---|---:|---:|
+| M1_Autoencoder | 0.7175 ± 0.0741 | 0.5965 ± 0.1026 |
+| M2_IsolationForest | 0.8068 ± 0.0077 | 0.6831 ± 0.0206 |
+| M3_DeepSVDD | 0.5002 ± 0.0072 | 0.6170 ± 0.0114 |
+| M4_DeepSAD | 0.8880 ± 0.0114 | 0.7492 ± 0.0614 |
+| M5_Supervised | 0.9659 ± 0.0002 | 0.9292 ± 0.0012 |
+| M6_MassAware | 0.5151 ± 0.0105 | 0.6670 ± 0.0233 |
 
-Metrics are ranking/shape diagnostics on simulated test data. The held-out 3-prong sample is never used to train these configurations. Thresholds are selected on validation background and frozen for test evaluation. The fixed-window sideband diagnostic is local; its 50-trial Poisson bootstrap has coarse tail resolution and is not a global p-value.
+Five-seed mean ± standard deviation. All 47 core results come from the fresh Python 3.11 CPU run. Historical results remain in `reports/reproduction/historical_results.csv`. Seed-42 sweeps and single-seed exploratory extensions are distinguished from these averages.
 
 ## Extended-study implementation and preliminary closure
 
@@ -32,4 +32,6 @@ Metrics are ranking/shape diagnostics on simulated test data. The held-out 3-pro
 
 Run `python -m pip install -e ".[dev]"` followed by `python scripts/reproduce.py`. The run verifies the official data files, builds features and deterministic splits, evaluates the grid, and writes model/data/run metadata under `data/`, `models/`, and `reports/`. Regenerate the PDF with `python scripts/build_report.py`.
 
-Remaining limitations include simulation-only scope, the released/local tau definition mismatch, only three seeds for headline runs, a seed-42 full grid, the limited null bootstrap ensemble, simplified fixed-window sideband fitting, and lack of a clean-room independent reproduction. See the PDF report and `PRD_final.md` for full protocol and audit detail.
+Remaining limitations include simulation-only scope, the released/local tau definition mismatch, five-seed uncertainty only for core headline settings, predominantly single-seed contamination/label-budget sweeps, the limited null bootstrap ensemble and simplified fixed-window sideband fitting. Finite-test AUC intervals are recorded separately in `reports/tables/auc_bootstrap.json`: 500 stratified paired bootstrap trials (seed 20261003) on 199,984 background and 19,996 signal events, from the final saved seed-42 checkpoints. These intervals are conditional on the fitted detectors and are separate from seed variance; other-metric intervals, detector systematics and external independent review remain outside this release. Clean-checkout verification is recorded in `reports/release_status.md`.
+
+The extended feature file was rebuilt with schema 2.0.0: the first five columns match the canonical core inputs, followed by tau32 for each jet, mJJ and the label. The previous cached file placed dRJJ after the tau32 columns. M9/M10 numerical claims are excluded pending a matching evaluation table; this does not affect M1--M6, which use the canonical feature file.

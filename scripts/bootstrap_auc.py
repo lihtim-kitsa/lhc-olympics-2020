@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 import yaml
 from sklearn.metrics import roc_auc_score
@@ -22,6 +23,7 @@ def main() -> None:
     parser.add_argument("--trials", type=int, default=500)
     parser.add_argument("--seed", type=int, default=20261003)
     args = parser.parse_args()
+    results = pd.read_csv("reports/tables/results.csv")
     torch.set_num_threads(1)
     scores = {}
     labels = None
@@ -54,15 +56,28 @@ def main() -> None:
         scores[name] = np.r_[
             score(model, xb, name, device), score(model, xs, name, device)
         ]
+        reference = results[
+            (results.model == name)
+            & (results.seed == 42)
+            & (results.f_train == data.get("f_train", 0))
+            & (results.k_labels == data.get("k_labels", 0))
+        ]
+        if len(reference) != 1 or not np.isclose(
+            roc_auc_score(labels, scores[name]),
+            reference.iloc[0].roc_auc,
+            atol=1e-10,
+            rtol=0,
+        ):
+            raise ValueError(f"{name}: checkpoint AUC does not match the release table")
     draws = paired_auc_bootstrap(labels, scores, args.trials, args.seed)
     output = {
         "method": "stratified paired event bootstrap; percentile 95% intervals",
-        "scope": "frozen seed-42 headline detectors, 2-prong test AUC only",
+        "scope": "frozen final seed-42 headline detectors, 2-prong test AUC only",
         "trials": args.trials,
         "bootstrap_seed": args.seed,
         "n_background": int((labels == 0).sum()),
         "n_signal": int((labels == 1).sum()),
-        "limitations": "Conditional on these trained models; separate from seed variance. No intervals for other metrics or global discovery claims.",
+        "limitations": "Conditional on the fitted detectors; separate from training-seed variance. No intervals for other metrics or global discovery claims.",
         "models": {
             name: {
                 "auc": float(roc_auc_score(labels, scores[name])),
@@ -82,6 +97,13 @@ def main() -> None:
     }
     target = Path("reports/tables/auc_bootstrap.json")
     target.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    np.savez_compressed(
+        "reports/tables/frozen_test_scores.npz",
+        labels=labels,
+        background_indices=np.load("data/splits/background_test.npy"),
+        signal_indices=np.load("data/splits/signal2_test.npy"),
+        **scores,
+    )
     print(f"Saved {args.trials} paired bootstrap trials to {target}")
 
 

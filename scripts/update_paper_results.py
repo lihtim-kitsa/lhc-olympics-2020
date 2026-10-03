@@ -2,7 +2,9 @@
 
 from pathlib import Path
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_curve
 
 ROOT = Path(__file__).resolve().parents[1]
 HEADLINES = {
@@ -97,7 +99,11 @@ def refresh():
             for row in group.itertuples():
                 cells = [name, str(row.seed)]
                 cells += [
-                    f"{getattr(row, field):.2f}"
+                    (
+                        f"{getattr(row, field):.2f}"
+                        if np.isfinite(getattr(row, field))
+                        else "invalid fit"
+                    )
                     for field in (
                         "pre_cut_local_significance",
                         "at_10pct_bkg_local_significance",
@@ -182,6 +188,19 @@ def refresh():
             )
         rows.append(" & ".join(cells) + r" \\")
     text = replace_table(text, "tab:deepsad_grid", rows)
+    rows = []
+    for fraction in (0.0, 0.1, 0.5, 1.0):
+        values = [
+            data[(data.model == model) & (data.seed == 42) & (data.f_train == fraction)]
+            .iloc[0]
+            .roc_auc
+            for model in ("M1_Autoencoder", "M2_IsolationForest", "M3_DeepSVDD")
+        ]
+        rows.append(
+            " & ".join([f"{fraction:g}\\%"] + [f"{value:.3f}" for value in values])
+            + r" \\"
+        )
+    text = replace_table(text, "tab:contamination", rows)
     # Drop stale numerical claims that are not established by the final diagnostics.
     text = text.replace(
         "local injected-signal significance above\n$8\\sigma$ after a 1\\% background cut.",
@@ -196,11 +215,33 @@ def refresh():
         encoding="utf-8",
     )
     plots(data, selected)
-    print("Updated four manuscript tables and data-derived figures.")
+    print("Updated five manuscript tables and data-derived figures.")
 
 
 def plots(data, selected):
     directory = ROOT / "reports/figures"
+    frozen = ROOT / "reports/tables/frozen_test_scores.npz"
+    if frozen.exists():
+        with np.load(frozen) as samples:
+            fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+            for model in (
+                "M1_Autoencoder",
+                "M2_IsolationForest",
+                "M4_DeepSAD",
+                "M5_Supervised",
+            ):
+                fpr, tpr, _ = roc_curve(samples["labels"], samples[model])
+                valid = fpr > 0
+                axes[0].plot(tpr[valid], 1 / fpr[valid], label=model)
+                axes[1].plot(tpr[valid], tpr[valid] / np.sqrt(fpr[valid]), label=model)
+            axes[0].set(
+                yscale="log", ylabel="Background rejection", title="Seed-42 ROC"
+            )
+            axes[1].set(ylabel="SIC", title="Seed-42 significance improvement")
+            for ax in axes:
+                ax.set(xlabel="Signal efficiency")
+                ax.legend(fontsize=7)
+            save(fig, directory / "headline_roc_sic_comparison.png")
     fig, ax = plt.subplots(figsize=(7, 4))
     for model in ("M1_Autoencoder", "M2_IsolationForest", "M3_DeepSVDD"):
         group = data[(data.model == model) & (data.seed == 42)].sort_values("f_train")

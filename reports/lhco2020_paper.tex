@@ -1,32 +1,74 @@
 %% ============================================================
-%%  Unsupervised and Semi-Supervised Anomaly Detection
-%%  on the LHC Olympics 2020 R&D Dataset
-%%  arXiv preprint — compile with pdflatex (or xelatex)
-%%  Requires: revtex4-2, amsmath, graphicx, booktabs, multirow,
-%%            xcolor, hyperref, cleveref, siunitx, subcaption
+%%  Unsupervised and semi-supervised anomaly detection on the
+%%  LHC Olympics 2020 R&D dataset
+%%  Formatted for npj Quantum Information (Nature Portfolio):
+%%   - single column, unnumbered headings
+%%   - Abstract (<200 words, no citations)
+%%   - Introduction / Results / Discussion / Methods
+%%   - numbered superscript citations, Nature-style references
+%%   - Data / Code availability, Acknowledgements,
+%%     Author contributions, Competing interests, Additional information
+%%  Compile: pdflatex -> pdflatex   (references are self-contained)
 %% ============================================================
-\documentclass[twocolumn,nofootinbib,amsmath,amssymb,preprintnumbers]{revtex4-2}
+\documentclass[11pt,a4paper]{article}
 
-\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
 \usepackage{amsmath,amssymb}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{xcolor}
-\usepackage{subcaption}
-\usepackage{siunitx}
-\usepackage{physics}
-\usepackage{hyperref}
-\usepackage{cleveref}
-\usepackage{float}
-\usepackage{url}
 \usepackage{array}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[font=small,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=false]{caption}
+\usepackage[super,sort&compress]{natbib}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+% \usepackage{lineno}\linenumbers   % uncomment for line-numbered submission
 
-\hypersetup{
-  colorlinks=true,
-  linkcolor=blue!60!black,
-  citecolor=green!50!black,
-  urlcolor=blue!70!black
-}
+\setstretch{1.12}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ---- Nature-style headings ---------------------------------------
+\titleformat{\section}{\sffamily\bfseries\Large}{}{0pt}{}
+\titlespacing*{\section}{0pt}{16pt}{6pt}
+\newcommand{\subhead}[1]{\par\vspace{4pt}{\sffamily\bfseries\normalsize #1}\par\nopagebreak\vspace{1pt}}
+\newcommand{\runin}[1]{\par\vspace{2pt}\textbf{#1.}\ }
+
+% ---- figure / table naming ----------------------------------------
+\captionsetup[figure]{name=Fig.}
+\captionsetup[table]{name=Table}
+\crefname{figure}{Fig.}{Figs.}
+\Crefname{figure}{Fig.}{Figs.}
+\crefname{table}{Table}{Tables}
+\Crefname{table}{Table}{Tables}
+\crefname{equation}{Eq.}{Eqs.}
+\Crefname{equation}{Eq.}{Eqs.}
+
+% natbib: numbered labels "1." in the reference list
+\makeatletter
+\renewcommand\@biblabel[1]{#1.}
+\makeatother
+\setlength{\bibsep}{2pt}
+\renewcommand{\bibfont}{\small}
+
+% Fix p{} columns
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% Figure helper: shows the image if present, otherwise a placeholder box
+\newcommand{\figbox}[1]{%
+  \IfFileExists{#1}{\includegraphics[width=\linewidth]{#1}}{%
+    \fbox{\parbox[c][3.4cm][c]{0.94\linewidth}{\centering\small\ttfamily
+    \detokenize{#1}\\[2pt](figure file not found)}}}}
 
 % ---- custom macros -----------------------------------------------
 \newcommand{\ftrain}{f_{\mathrm{train}}}
@@ -44,310 +86,162 @@
 \newcommand{\code}[1]{\texttt{#1}}
 % ------------------------------------------------------------------
 
+\input{release_results.tex}
 \begin{document}
 
-\title{Unsupervised and Semi-Supervised Anomaly Detection \\
-on the LHC Olympics 2020 R\&D Dataset}
+% ==================== TITLE BLOCK ================================
+\begin{flushleft}
+{\sffamily\bfseries\fontsize{20}{24}\selectfont
+Unsupervised and semi-supervised anomaly detection on the LHC Olympics 2020 R\&D dataset\par}
+\vspace{12pt}
+{\sffamily\large Mithil Hardik Astik\textsuperscript{1}}\\[6pt]
+{\small\textsuperscript{1}Department of Physics, BITS Pilani, Hyderabad Campus, Hyderabad, Telangana, India.\\
+\hspace*{0.5em}$\boxtimes$\,e-mail: f20240923@hyderabad.bits-pilani.ac.in}
+\end{flushleft}
 
-\author{Astik}
-\email{lhco2020@example.com}
-\affiliation{Department of Physics, [Institution], [City], [Country]}
+% ==================== ABSTRACT ===================================
+\begin{flushleft}
+\sffamily\small
+\textbf{Model-agnostic searches for new physics at the Large Hadron Collider rely on anomaly
+detection, yet trade-offs between supervision, training contamination and invariant-mass
+distortion remain poorly quantified. I benchmark unsupervised, weakly supervised and
+supervised detectors on the LHC Olympics 2020 R\&D dijet dataset using five jet-substructure
+features. Isolation Forest is the strongest learned unsupervised detector ($\auc = \IFHeadline$);
+Deep SAD with 100 labelled anomalies reaches $\auc = \SADHeadline$, against $\SupMean$ for
+the supervised reference, with $\jsd = \SADJSD$ and a descriptive local fixed-window diagnostic. Deep SAD retains $\auc = \SADTransferHeadline$ on held-out
+three-prong events. Follow-up extensions test a masked Deep Sets autoencoder on constituent
+inputs, two external signals, conformal calibration of an ANODE score and background-only
+closure. The Deep Sets AUCs are 0.498 (nominal two-prong), 0.441 (three-prong), 0.465
+($X\to YY'$) and 0.507 ($W_{KK}\to WR\to3W$). Sideband conformal $p$-values are consistent with uniformity (KS $= 0.0043$,
+$p = 0.179$); background-only closure shows no local $Z \geq 3$ fluctuations for two of
+three tested scores at a nominal 1\% cut. The richer representation did not improve
+discrimination, and calibration and closure claims remain conditional on simulated
+background.}
+\end{flushleft}
 
-\date{\today}
-
-% =========================================================
-\begin{abstract}
-We present a systematic comparison of unsupervised and semi-supervised
-anomaly detection algorithms on the LHC Olympics 2020 R\&D benchmark
-dataset~\cite{Kasieczka2021}. Starting from five high-level jet
-substructure features extracted from the official FastJet-contrib
-release files, we evaluate six detector architectures spanning three
-supervision regimes: fully unsupervised (Autoencoder~M1, Isolation
-Forest~M2, Deep~SVDD~M3), weakly semi-supervised (Deep~SAD~M4 with
-variable training contamination $\ftrain$ and label budget
-$\klabels$), fully supervised as an oracle upper bound (M5), and a
-mass-decorrelated variant (M6). We additionally introduce three new
-baselines: a simple $\tautwo$ cut (M0), CWoLa Hunting~\cite{Collins2019}
-(M7), and an ANODE-style density estimator~\cite{Nachman2020} (M8).
-Our key finding is that Deep~SAD with only $\klabels=100$ labeled
-anomaly events achieves $\auc = 0.934 \pm 0.001$, closing more than
-$90\%$ of the gap between the best unsupervised baseline (Isolation
-Forest, $\auc=0.806$) and the fully supervised oracle ($\auc=0.966$),
-while maintaining low mass sculpting ($\jsd \approx 0.013$).
-We characterise the effect of training contamination on unsupervised
-detectors, quantify mass sculpting via Jensen--Shannon divergence,
-demonstrate generalisation to an unseen 3-prong signal topology, and
-report bump-hunt local significance exceeding $8\sigma$ for Deep~SAD
-after a $1\%$ background efficiency cut.
-\end{abstract}
-
-\pacs{29.85.Fj, 07.05.Mh, 89.70.Eg}
-\keywords{anomaly detection, LHC Olympics, Deep SVDD, Deep SAD, jet substructure, semi-supervised learning, bump hunt}
-
-\maketitle
+\vspace{4pt}
+\hrule
+\vspace{2pt}
 
 % =========================================================
 \section{Introduction}
-\label{sec:intro}
 
 The discovery of physics beyond the Standard Model (BSM) at the Large
 Hadron Collider (LHC) typically relies on targeted searches optimised
-for a specific signal hypothesis. Model-agnostic or \emph{anomaly
+for a specific signal hypothesis. Model-agnostic \emph{anomaly
 detection} approaches instead aim to identify rare, unusual events
-against the dominant QCD background without assuming a specific new
-physics model. Such methods are particularly motivated because the
-LHC's full dataset contains signatures of processes that existing
-analyses may have overlooked.
+against the dominant quantum chromodynamics (QCD) background, without assuming a
+particular new-physics model.\cite{Karagiorgi2022,Belis2024} They are motivated by the
+possibility that the full LHC dataset contains signatures that existing
+analyses have overlooked. Such strategies have also moved from proposal to
+practice: ATLAS and CMS have reported dijet and related resonance searches based on
+weakly supervised, unsupervised and semi-supervised anomaly
+detection.\cite{ATLAS2020,ATLAS2023,ATLAS2024,ATLAS2025,CMS2025}
 
-Machine learning provides a natural framework for anomaly detection.
-Autoencoders~\cite{Farina2020}, variational autoencoders,
-normalising flows~\cite{Nachman2020}, and classification-based
-methods~\cite{Collins2019,DAgnolo2019} have all been explored.
-The LHC Olympics (LHCO) 2020 challenge~\cite{Kasieczka2021} provides
+Machine learning offers a natural framework for anomaly detection.
+Approaches explored so far include
+autoencoders,\cite{Hajer2020,Heimel2019,Farina2020,Cerri2019,Blance2019,Finke2021}
+normalising flows and other density
+estimators,\cite{Nachman2020,Andreassen2020,Hallin2022} and classification-based
+methods.\cite{Metodiev2017,Collins2018,Collins2019,DAgnolo2019}
+More recently, boosted decision trees have been shown to outperform deep
+networks as classifiers in weakly supervised searches,\cite{Finke2024} and weak
+supervision has been combined with information from a class of signal
+models.\cite{Cheng2025}
+The LHC Olympics (LHCO) 2020 challenge\cite{Kasieczka2021} provides
 a standardised benchmark with a hidden dijet resonance signal, enabling
-fair comparison across methods.
+fair comparison across methods. The Dark Machines challenge\cite{Aarrestad2022}
+offers a complementary event-level benchmark, and resonant weakly supervised methods
+have been compared systematically on the LHCO R\&D dataset.\cite{Golling2024}
 
-Despite this activity, several important questions remain
-under-explored: (i)~How sensitive are unsupervised detectors to
-accidental signal contamination in the training set? (ii)~What is the
-benefit of a small set of labeled anomalies (\emph{weak supervision})?
-(iii)~How much does each method sculpt the dijet mass spectrum, and
-does a mass-decorrelated architecture genuinely help? (iv)~Do learned
-anomaly scores transfer to structurally different signal topologies?
+Despite this activity, four questions remain under-explored.
+First, how sensitive are unsupervised detectors to accidental signal
+contamination in the training set? Second, what does a
+small set of labelled anomalies (weak supervision) add? Third, how much does each method
+sculpt the dijet mass spectrum, and does a mass-decorrelated
+architecture actually help? Fourth, do learned anomaly scores transfer
+to structurally different signal topologies?
 
-This paper addresses all four questions with a comprehensive,
-reproducible study on the LHCO 2020 R\&D dataset. Our contributions
-are:
-\begin{itemize}
-\item A clean reproduction and systematic comparison of six
-  anomaly-detection architectures (M0--M6) with controlled
-  randomisation over multiple seeds.
-\item A root-cause diagnosis of the Deep~SVDD collapse and the Deep~SAD
-  label-contamination bug, together with targeted fixes.
-\item Rigorous characterisation of mass sculpting (JSD) and
-  discrimination ($1/\eB$ at fixed $\eS$, max SIC, bump-hunt $Z$).
-\item A generalisation study to an unseen 3-prong signal topology
-  ($X \to YY \to qqq$).
-\item New baselines: CWoLa Hunting (M7) and an ANODE-style
-  Gaussian-mixture density estimator (M8).
-\item An extended 7-feature dataset adding $\tauthree$ for both jets.
-\end{itemize}
-
-% =========================================================
-\section{Dataset and Features}
-\label{sec:data}
-
-\subsection{LHC Olympics 2020 R\&D Dataset}
-\label{sec:lhco}
-
-The LHCO 2020 R\&D dataset~\cite{Kasieczka2021} consists of
-1,100,000 dijet events: 1,000,000 QCD-background events produced with
-Pythia\,8~\cite{Sjostrand2015} and Delphes~\cite{deFavereau2014}, and
-100,000 signal events from the process $Z' \to XY$,
-$X \to q\bar{q}$ and $Y \to q\bar{q}$, at $m_{Z'} = 3.5$~TeV,
-$m_X = 500$~GeV, $m_Y = 100$~GeV. The signal produces a
-characteristic two-pronged topology in each of the two leading jets.
-A second held-out signal sample with a 3-prong topology ($X \to YY
-\to qqq$, $m_X = 3.5$~TeV, $m_Y = 170$~GeV) is used exclusively for
-generalisation evaluation.
-
-Events are split into disjoint train, validation, and test sets as
-summarised in \cref{tab:splits}. Signal events in the training set
-are only used when explicitly injected (contamination studies) or
-labeled (Deep~SAD / Supervised).
-
-\begin{table}[t]
-\centering
-\caption{Dataset splits used throughout this study.}
-\label{tab:splits}
-\begin{tabular}{lcc}
-\toprule
-Split & Background & Signal (2-prong) \\
-\midrule
-Train & 800,000 & 80,000 \\
-Validation & 100,000 & 10,000 \\
-Test & 100,000 & 10,000 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Feature Extraction}
-\label{sec:features}
-
-High-level features are derived from the two leading anti-$k_T$ jets
-($R = 1.0$) using the official FastJet-contrib N-subjettiness
-implementation~\cite{Thaler2011}. The five standard features used by
-all models are listed in \cref{tab:features}. The dijet invariant mass
-$\mjj$ (feature index~5) is deliberately withheld from the standard
-feature set to prevent trivial mass sculpting; it is only used by
-CWoLa (M7), ANODE (M8), and the mass-aware variant (M6).
-
-\begin{table}[t]
-\centering
-\caption{Standard five-feature set (indices 0--4).}
-\label{tab:features}
-\begin{tabular}{clp{4.5cm}}
-\toprule
-Idx & Feature & Description \\
-\midrule
-0 & $m_{J_1}$ & Leading-jet invariant mass [GeV] \\
-1 & $|\Delta m_J|$ & Jet-mass asymmetry $|m_{J_1}-m_{J_2}|$ [GeV] \\
-2 & $\tautwo^{J_1}$ & 2-to-1 N-subjettiness, leading jet \\
-3 & $\tautwo^{J_2}$ & 2-to-1 N-subjettiness, sub-leading jet \\
-4 & $\drjj$ & Angular separation of the two jets \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-All features are standardised (zero mean, unit variance) using a
-\code{StandardScaler} fitted \emph{only} on the background training
-set, and never on signal events.
-
-\subsection{Extended Feature Set}
-\label{sec:extfeatures}
-
-For the generalisation study (\cref{sec:generalisation}) we
-additionally compute the 3-to-2 N-subjettiness ratio
-$\tauthree^{J_{1,2}} = \tau_3/\tau_2$ for both jets, extending the
-feature vector to seven dimensions. This variable directly discriminates
-3-prong decay products from QCD dijets. The extended dataset is stored
-at \code{data/processed/events\_v2\_extended\_features.h5}.
+Here I address all four questions in a reproducible
+study on the LHCO 2020 R\&D dataset. I reproduce and systematically
+compare six anomaly-detection architectures, with controlled
+randomisation over multiple seeds. I diagnose the collapse of Deep SVDD
+and a label-assignment error in Deep SAD, and apply targeted fixes.
+Mass sculpting and discrimination are characterised through the
+Jensen--Shannon divergence (JSD), background rejection at fixed signal
+efficiency, the maximum significance improvement characteristic and
+bump-hunt significance, and generalisation is tested on an unseen
+three-prong signal topology ($W' \to XY$, $X,Y \to qqq$). I additionally
+implement a simple $\tautwo$ cut; resonant-search baselines (CWoLa Hunting, an
+ANODE-style Gaussian-mixture density estimator, a CATHODE-style proxy and a tree-based
+CWoLa variant); a mass-decorrelated sliced-Wasserstein detector with a semi-supervised
+extension; and an extended seven-feature dataset that adds $\tauthree$ for both jets.
+Follow-up studies test a constituent-level permutation-invariant model, an
+independent external signal, sideband score calibration and background-only closure.
 
 % =========================================================
-\section{Methods}
-\label{sec:methods}
+\section{Results}
 
-\subsection{Model Overview}
-\label{sec:models}
-
-We evaluate nine anomaly detectors spanning the full supervision
-spectrum from purely heuristic cuts to fully supervised classifiers.
-All neural models share the same \emph{bias-free} linear layer backbone
-required by the SVDD family of losses, with architecture
-$5 \to 32 \to 16 \to 8 \to 1$ (SVDD/SAD) or
-$5 \to 32 \to 16 \to 8$ (encoder, Autoencoder).
-\Cref{tab:models} summarises the models.
+\subhead{Benchmark overview}
+I use the LHCO 2020 R\&D dataset,\cite{Kasieczka2021} which contains
+1,000,000 simulated QCD dijet background events and 100,000 signal events
+from $Z' \to XY$ with $X \to q\bar{q}$ and $Y \to q\bar{q}$. Each event is
+described by five high-level jet-substructure features (\cref{tab:features} in Methods).
+Thirteen detectors, M0--M12, span the supervision spectrum from purely heuristic cuts to
+fully supervised classifiers (\cref{tab:models}). The neural models
+share a bias-free linear-layer backbone, as the Deep SVDD family of
+losses requires.\cite{Ruff2018,Ruff2020,Ruff2021} The headline comparison below concerns
+M1--M6; the additional detectors M0 and M7--M12 are described in Methods, and
+M7--M12 are compared in a dedicated subsection below.
 
 \begin{table}[t]
 \centering
-\caption{Model summary. $d_\mathrm{in}$ denotes input dimension.}
+\caption{\textbf{Summary of the anomaly detectors.} Model IDs M0--M12, their supervision
+regime and anomaly score. $\phi$ is the network embedding and $c$ the fixed hypersphere centre.}
 \label{tab:models}
+\small
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{clll}
 \toprule
 ID & Model & Supervision & Score \\
 \midrule
-M0 & $\tautwo$ Cut & None & $-(\tautwo^{J_1}+\tautwo^{J_2})$ \\
+M0 & $\tautwo$ cut & None & $-(\tautwo^{J_1}+\tautwo^{J_2})$ \\
 M1 & Autoencoder & Unsupervised & Reconstruction MSE \\
 M2 & Isolation Forest & Unsupervised & Mean isolation depth \\
 M3 & Deep SVDD & Unsupervised & $\|\phi(x)-c\|^2$ \\
 M4 & Deep SAD & Weak & $\|\phi(x)-c\|^2$, $(\cdot)^{-1}$ for $y{=}1$ \\
 M5 & Supervised MLP & Supervised & $\hat{p}(y{=}1|x)$ \\
-M6 & Mass-Aware SVDD & Unsupervised & $\|\phi(x)-c\|^2$ ($+\mjj$) \\
+M6 & Mass-aware SVDD & Unsupervised & $\|\phi(x)-c\|^2$ ($+\mjj$) \\
 M7 & CWoLa Hunting & SR/SB labels & $\hat{p}(\mathrm{SR}|x)$ \\
 M8 & ANODE (GMM) & Density-based & $-\log p_{\mathrm{SB}}(x)$ \\
+M9 & MD-SWAD & Unsupervised & $\|\phi(x)\|^2$ \\
+M10 & MD-SWAD-SAD & Weak & $\|\phi(x)\|^2$ \\
+M11 & CATHODE (CVAE) & SR/SB labels & $\hat{p}(\mathrm{data}|x)$ \\
+M12 & CWoLa Trees & SR/SB labels & $\hat{p}(\mathrm{SR}|x)$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Loss Functions}
-\label{sec:losses}
-
-The Autoencoder (M1) minimises mean-squared reconstruction error:
-\begin{equation}
-\mathcal{L}_{\mathrm{AE}} = \frac{1}{n}\sum_{i=1}^n \|x_i - \hat{x}_i\|^2 .
-\end{equation}
-
-Deep~SVDD~\cite{Ruff2018} (M3) minimises the mean distance from a
-fixed centre $c$:
-\begin{equation}
-\mathcal{L}_{\mathrm{SVDD}} = \frac{1}{n}\sum_{i=1}^n \|\phi(x_i) - c\|^2 .
-\end{equation}
-
-Deep~SAD~\cite{Ruff2020} (M4) extends this with an inverse-distance
-penalty for labeled anomalies ($y_i = 1$):
-\begin{equation}
-\mathcal{L}_{\mathrm{SAD}} = \frac{1}{n}\sum_{y_i=0}\|\phi(x_i)-c\|^2
-  + \frac{\eta}{n}\sum_{y_i=1}\left(\|\phi(x_i)-c\|^2\right)^{-1},
-\label{eq:sad}
-\end{equation}
-where $\eta > 0$ controls the anomaly repulsion strength. Unlabeled
-events ($y_i = 0$) include both background training events and any
-signal events injected without labels (\cref{sec:contamination}).
-
-\subsection{Training Protocol}
-\label{sec:training}
-
-All neural models are trained with Adam~\cite{Kingma2015}
-($\mathrm{lr}=10^{-3}$, weight decay $10^{-5}$), batch size~256, and
-early stopping with patience~8 on the validation loss. Model selection
-uses the checkpoint with the lowest validation objective. Three seeds
-(42, 43, 44) are used for all headline comparisons.
-
-\subsection{Contamination and Label Budget}
-\label{sec:contamination}
-
-Training contamination $\ftrain$ is defined as the fraction of the
-background training pool size ($N_\mathrm{bkg}=800{,}000$) injected as
-unlabeled signal events. For example, $\ftrain = 0.5\%$ introduces
-$4{,}000$ additional signal events into the training set without
-labels.
-
-The label budget $\klabels$ (Deep~SAD only) is the number of signal
-events assigned a positive label ($y=1$) from the injected pool. These
-events are drawn \emph{after} the contamination injection and are
-mutually exclusive with unlabeled-injected events.
-
-\subsection{Evaluation Metrics}
-\label{sec:metrics}
-
-\paragraph{AUC and ROC.}
-Area under the receiver-operating-characteristic curve.
-
-\paragraph{Background rejection at fixed signal efficiency.}
-$1/\eB$ evaluated at $\eS \in \{10\%, 30\%, 50\%\}$.
-
-\paragraph{Maximum Significance Improvement Characteristic (SIC).}
-\begin{equation}
-\sic_\mathrm{max} = \max_t \frac{\eS(t)}{\sqrt{\eB(t)}} .
-\end{equation}
-
-\paragraph{Jensen--Shannon Divergence (JSD).}
-\begin{equation}
-\jsd(P \| Q) = \frac{1}{2} D_{\mathrm{KL}}(P\|M) + \frac{1}{2} D_{\mathrm{KL}}(Q\|M),
-\end{equation}
-where $M = (P+Q)/2$, $P$ is the normalised inclusive background
-$\mjj$ distribution, and $Q$ is the normalised $\mjj$ distribution
-after a score cut at a fixed background efficiency. $\jsd = 0$ means
-no sculpting.
-
-\paragraph{Score--$\mjj$ correlation.}
-Pearson correlation coefficient $\rho(s, \mjj)$ between anomaly
-scores $s$ and $\mjj$ on the background test sample. $|\rho| \to 0$
-is ideal.
-
-\paragraph{Bump-hunt significance.}
-Local significance $Z$ from a likelihood-ratio test of a Gaussian
-bump on an exponential-polynomial background fitted to the $\mjj$
-spectrum after applying the anomaly score cut.
-
-% =========================================================
-\section{Results}
-\label{sec:results}
-
-\subsection{Headline Comparison}
-\label{sec:headline}
-
+\subhead{Headline comparison}
 \Cref{tab:headline} reports the main performance metrics for the
-headline configuration of each model, averaged over seeds 42, 43,~44.
+headline configuration of each model, averaged over seeds 42--46 for M1--M6.
+The fully supervised multilayer perceptron (M5) sets an oracle upper bound of
+$\auc = \SupMean$. Among the unsupervised methods in the headline set, Isolation Forest\cite{Liu2008} (M2)
+performs best, with $\auc = \IFMean$, clearly outperforming the autoencoder
+and both SVDD variants. Deep SAD (M4) at $\ftrain = 0.5\%$ and
+$\klabels = 100$ reaches $\auc = \SADMean$, recovering much of
+the gap between M2 and M5 with only 100 labelled examples.
+\Cref{fig:roc_sic} shows the receiver-operating-characteristic (ROC) and significance
+improvement characteristic (SIC) curves for the four informative headline
+models.
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering
-\caption{Headline results (mean $\pm$ std, 3 seeds). Best
-  unsupervised result in \textbf{bold}; oracle upper bound in
-  \textit{italics}. JSD evaluated at $10\%$ background efficiency.
-  $\infty$ indicates the threshold was never crossed.}
+\caption{\textbf{Headline results} (mean $\pm$ s.d., five seeds for the six core models; single evaluation for deterministic cuts and specific baselines). Best
+  unsupervised result in bold; oracle upper bound in italics. JSD is evaluated at $10\%$
+  background efficiency.}
 \label{tab:headline}
+\resizebox{\textwidth}{!}{%
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{l lll rrr cc c}
 \toprule
@@ -362,471 +256,776 @@ headline configuration of each model, averaged over seeds 42, 43,~44.
 \cmidrule(lr){5-7}
 & & & & 10\% & 30\% & 50\% & & & \\
 \midrule
-M1: Autoencoder      & 0\%  & 0    & $0.657{\pm}0.076$ & 13.5  & 6.2   & 3.7  & $1.13{\pm}0.12$ & 0.0677 & $0.119$ \\
-\textbf{M2: Isolation Forest} & 0\%  & 0 & $\mathbf{0.806{\pm}0.009}$ & \textbf{29.4} & \textbf{13.3} & \textbf{7.8} & $\mathbf{1.52{\pm}0.07}$ & 0.0282 & $0.284$ \\
-M3: Deep SVDD        & 0\%  & 0    & $0.493{\pm}0.011$ & 6.2   & 3.2   & 2.1  & $1.00{\pm}0.00$ & 0.0011 & $0.020$ \\
-M4: Deep SAD         & 0.5\%& 100  & $0.934{\pm}0.001$ & 2286  & 370   & 91.5 & $6.28{\pm}0.88$ & 0.0126 & $0.051$ \\
-\textit{M5: Supervised}       & —    & 1000 & \textit{$0.966{\pm}0.000$} & \textit{35553} & \textit{2214} & \textit{400} & \textit{$24.5{\pm}3.9$} & \textit{0.0080} & \textit{$0.015$} \\
-M6: Mass-Aware SVDD  & 0\%  & 0    & $0.523{\pm}0.025$ & 7.7   & 3.6   & 2.3  & $1.00{\pm}0.00$ & 0.0251 & $0.073$ \\
+M1: Autoencoder & 0\% & 0 & $0.718\pm0.074$ & 22.5 & 10.7 & 5.1 & $1.207\pm0.191$ & 0.0168 & 0.065 \\
+M2: Isolation Forest & 0\% & 0 & $0.807\pm0.008$ & 29.0 & 13.1 & 7.8 & $1.521\pm0.055$ & 0.0287 & 0.285 \\
+M3: Deep SVDD & 0\% & 0 & $0.500\pm0.007$ & 6.5 & 3.3 & 2.1 & $1.000\pm0.000$ & 0.0012 & 0.022 \\
+M4: Deep SAD & 0.5\% & 100 & $0.888\pm0.011$ & 452.7 & 119.9 & 43.5 & $3.402\pm0.433$ & 0.0066 & 0.042 \\
+M5: Supervised & 0\% & 1000 & $0.966\pm0.000$ & 39330.2 & 2189.6 & 402.0 & $25.128\pm2.963$ & 0.0082 & 0.016 \\
+M6: Mass-aware SVDD & 0\% & 0 & $0.515\pm0.010$ & 7.6 & 3.5 & 2.2 & $1.000\pm0.000$ & 0.0262 & 0.071 \\
+M0: TauCut & 0\% & 0 & 0.891 & 251.2 & 52.4 & 20.9 & 2.30 & 0.0032 & 0.062 \\
+M7: CWoLa & 0\% & 0 & 0.605 & 10.5 & 4.0 & 2.6 & 1.07 & 0.1890 & 0.433 \\
+M8: ANODE & 0\% & 0 & 0.720 & 18.1 & 7.5 & 4.3 & 1.20 & 0.0580 & 0.337 \\
+M11: CATHODE: CVAE & 0\% & 0 & 0.481 & 1.2 & 1.2 & 1.2 & 1.00 & 0.0002 & -0.028 \\
+M12: CWoLaTrees & 0\% & 0 & 0.575 & 9.6 & 4.0 & 2.4 & 1.04 & 0.1887 & 0.451 \\
 \bottomrule
-\end{tabular}
-\end{table*}
-
-The fully supervised MLP (M5) sets an oracle upper bound of
-$\auc = 0.966$. Among unsupervised methods, Isolation Forest (M2)
-achieves $\auc = 0.806$, significantly outperforming the Autoencoder
-and both SVDD variants. Deep SAD (M4) at $\ftrain = 0.5\%$,
-$\klabels = 100$ reaches $\auc = 0.934$, closing more than $90\%$ of
-the gap between M2 and M5 with only 100 labeled examples.
-
-\subsection{ROC and SIC Curves}
-\label{sec:roc_sic}
-
-\Cref{fig:roc_sic} shows the ROC curve (background rejection vs.
-signal efficiency) and the SIC curve for the four informative headline
-models at seed~42.
+\end{tabular}}
+\end{table}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/headline_roc_sic_comparison.png}
-  \caption{ROC curve (top, log-scale $1/\eB$) and SIC curve (bottom)
-    for the four informative headline models (seed~42). Deep SAD~(M4)
-    approaches the supervised oracle~(M5) at all signal efficiencies.}
+  \figbox{figures/headline_roc_sic_comparison.png}
+  \caption{\textbf{ROC and SIC curves for the headline models.} ROC curve (left, log-scale $1/\eB$)
+    and SIC curve (right) for the four informative headline models (seed~42). Deep SAD (M4)
+    improves over the learned unsupervised baselines while remaining below the supervised reference (M5).}
   \label{fig:roc_sic}
 \end{figure}
 
-\subsection{Effect of Weak Supervision in Deep SAD}
-\label{sec:deepsad_grid}
-
+\subhead{Effect of weak supervision in Deep SAD}
 \Cref{tab:deepsad_grid} gives the full $(\ftrain, \klabels)$ grid for
-Deep SAD at seed~42, and \cref{fig:deepsad_heatmap} shows the same
-information as a heatmap.
+Deep SAD, reported for seed 42, and \cref{fig:deepsad_heatmap} shows the same
+information as a heat map. Increasing the label budget improves the seed-42
+ranking in each contamination regime. The contamination response is not monotonic:
+unlabelled injected signals can help or hurt at a fixed label budget. These
+single-seed sweep results do not identify a causal mechanism or establish an
+optimal label budget. The five-seed headline comparison holds the contamination
+and label budget fixed.
 
 \begin{table}[t]
 \centering
-\caption{Deep SAD ROC AUC as a function of training contamination
-  $\ftrain$ and label budget $\klabels$ (seed~42).}
+\caption{\textbf{Deep SAD ROC AUC over the contamination--label grid.} AUC as a function of training contamination
+  $\ftrain$ and label budget $\klabels$ (seed 42).}
 \label{tab:deepsad_grid}
 \begin{tabular}{cccc}
 \toprule
-$\ftrain$ & $k=10$ & $k=100$ & $k=1000$ \\
+$\ftrain$ & $\klabels=10$ & $\klabels=100$ & $\klabels=1000$ \\
 \midrule
-0.0\% & 0.7807 & 0.8923 & 0.9286 \\
-0.5\% & 0.9232 & 0.9335 & 0.9392 \\
-1.0\% & 0.9408 & 0.9373 & 0.9413 \\
+0\% & 0.761 & 0.895 & 0.928 \\
+0.5\% & 0.845 & 0.876 & 0.932 \\
+1\% & 0.770 & 0.889 & 0.926 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/deepsad_auc_grid.png}
-  \caption{Deep SAD AUC heatmap over the $(\ftrain, \klabels)$ grid
-    (seed~42). Even $\klabels = 10$ raises AUC substantially above
-    the unsupervised baseline; gains saturate near $\klabels = 100$.}
+  \figbox{figures/deepsad_auc_grid.png}
+  \caption{\textbf{Deep SAD AUC heat map.} AUC over the $(\ftrain, \klabels)$ grid (seed~42).}
   \label{fig:deepsad_heatmap}
 \end{figure}
 
-Two effects are visible: (i)~the label budget $\klabels$ provides a
-strong monotonic AUC gain, with the largest marginal improvement
-between $\klabels = 10$ and $\klabels = 100$; (ii)~training
-contamination $\ftrain$ provides a secondary additive boost, as
-unlabeled signal in the training set biases the SVDD centre away from
-the signal manifold.
-
-\subsection{Effect of Contamination on Unsupervised Models}
-\label{sec:contamination_results}
-
-\Cref{fig:contamination} shows how $\ftrain$ affects the unsupervised
+\subhead{Effect of contamination on unsupervised models}
+\Cref{fig:contamination} and \cref{tab:contamination} show how $\ftrain$ affects the unsupervised
 detectors. Isolation Forest is robust across the full contamination
-range ($\auc \approx 0.81$--$0.82$). The Autoencoder shows
-non-monotonic behaviour: modest contamination can improve performance
-by teaching reconstruction of background patterns. Deep SVDD degrades
-with $\ftrain$ but remains near-random regardless.
+range ($\auc \approx 0.81$--$0.82$). The autoencoder behaves
+non-monotonically, fluctuating significantly as contamination increases,
+without a clear trend. Deep SVDD degrades
+with $\ftrain$ but stays near-random throughout.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/contamination_auc_effect.png}
-  \caption{ROC AUC vs.\ training contamination $\ftrain$ for the
-    three unsupervised models (mean $\pm$ std over seeds 42--44).
+  \figbox{figures/contamination_auc_effect.png}
+  \caption{\textbf{Robustness of unsupervised detectors to contamination.} ROC AUC versus training
+    contamination $\ftrain$ for the three unsupervised models (seed 42).
     Isolation Forest is robust; Deep SVDD degrades monotonically.}
   \label{fig:contamination}
 \end{figure}
 
 \begin{table}[t]
 \centering
-\caption{Unsupervised AUC vs.\ $\ftrain$ (seed~42).}
+\caption{\textbf{Unsupervised AUC versus contamination.} AUC as a function of $\ftrain$ (seed~42).}
 \label{tab:contamination}
 \begin{tabular}{cccc}
 \toprule
 $\ftrain$ & M1: AE & M2: IF & M3: SVDD \\
 \midrule
-0.0\% & 0.654 & 0.817 & 0.483 \\
-0.1\% & 0.496 & 0.817 & 0.479 \\
-0.5\% & 0.505 & 0.818 & 0.461 \\
-1.0\% & 0.685 & 0.814 & 0.457 \\
+0\% & 0.794 & 0.817 & 0.512 \\
+0.1\% & 0.703 & 0.817 & 0.487 \\
+0.5\% & 0.716 & 0.818 & 0.479 \\
+1\% & 0.724 & 0.814 & 0.444 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Mass Sculpting}
-\label{sec:sculpting}
-
-\paragraph{Diagnostic plots.}
+\subhead{Mass sculpting}
 \Cref{fig:mass_diag_sad,fig:mass_diag_sup} show three-panel $\mjj$
-diagnostic plots for the two best-performing models. Each panel shows:
-(i)~the normalised $\mjj$ spectrum before and after applying score
+diagnostic plots for the two best-performing models; the corresponding
+plot for Isolation Forest is in Supplementary Fig.~\ref{fig:if_diag}. Each figure shows
+(i)~the normalised $\mjj$ spectrum before and after score
 cuts at $10\%$ and $1\%$ background efficiency; (ii)~the bin-by-bin
 background acceptance as a function of $\mjj$; and (iii)~the mean
-anomaly score per $\mjj$ bin (revealing residual score--mass
-correlation).
+anomaly score per $\mjj$ bin, which reveals any residual score--mass
+correlation.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/M4_DeepSAD_f0.5_k100_42_mass_diagnostics.png}
-  \caption{Mass sculpting diagnostics for Deep SAD ($\ftrain=0.5\%$,
-    $\klabels=100$, seed~42). The background $\mjj$ spectrum is
+  \figbox{figures/M4_DeepSAD_f0.5_k100_42_mass_diagnostics.png}
+  \caption{\textbf{Mass-sculpting diagnostics for Deep SAD.} $\ftrain=0.5\%$,
+    $\klabels=100$, seed~42. The background $\mjj$ spectrum is
     largely preserved at $10\%$ background efficiency (teal). A modest
     excess near $3.5$~TeV appears at $1\%$ efficiency (orange),
-    consistent with the injected signal. Score--$\mjj$ correlation
-    $\rho = 0.051$.}
+    consistent with the injected signal. The score--mass correlation is reported in the measured results table.}
   \label{fig:mass_diag_sad}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/M5_Supervised_f0_k1000_42_mass_diagnostics.png}
-  \caption{Mass sculpting diagnostics for the Supervised MLP ($\klabels=1000$,
-    seed~42). The $1\%$ cut reveals a clear resonant excess near $3.5$~TeV.
-    Score--$\mjj$ correlation $\rho = 0.015$.}
+  \figbox{figures/M5_Supervised_f0_k1000_42_mass_diagnostics.png}
+  \caption{\textbf{Mass-sculpting diagnostics for the supervised MLP.} $\klabels=1000$,
+    seed~42. The $1\%$ cut reveals a clear resonant excess near $3.5$~TeV.
+    The score--mass correlation is reported in the measured results table.}
   \label{fig:mass_diag_sup}
 \end{figure}
 
-\paragraph{Discrimination--sculpting trade-off.}
 \Cref{fig:jsd_auc} plots AUC against JSD for all headline models
 across all seeds. The ideal detector lies in the lower-right corner
-(high AUC, low JSD). Deep SAD occupies a strongly favourable position,
-combining near-oracle discrimination with JSD comparable to the
-supervised model.
+(high AUC, low JSD). Deep SAD occupies a highly favourable position,
+combining near-oracle discrimination with a JSD comparable to that of the
+supervised model. Isolation Forest, although the best unsupervised
+detector in AUC, has the largest score--mass correlation ($\rho = 0.284$),
+which produces a non-flat acceptance profile that preferentially retains
+high-mass events (Supplementary Fig.~\ref{fig:if_diag}). This underlines the importance of
+monitoring JSD alongside AUC.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/jsd_vs_auc_tradeoff.png}
-  \caption{Discrimination--sculpting trade-off. Each point is one
+  \figbox{figures/jsd_vs_auc_tradeoff.png}
+  \caption{\textbf{Discrimination--sculpting trade-off.} Each point is one
     (model, seed) pair; stars mark the per-model mean. Deep SAD
-    (green, M4) is the only method combining AUC $> 0.9$ with
-    $\jsd < 0.02$.}
+    (M4) is the semi-supervised method; its discrimination and mass-shape trade-off are measured directly rather than inferred from AUC alone.}
   \label{fig:jsd_auc}
 \end{figure}
 
-\subsection{Bump Hunt}
-\label{sec:bumpHunt}
-
+\subhead{Bump hunt}
 \Cref{tab:bumphunt} reports the local significance $Z$ before any cut,
-after the $10\%$ background efficiency cut, and after the $1\%$
-background efficiency cut, for the two best models.
+after a cut at $10\%$ background efficiency and after a cut at $1\%$
+background efficiency, for two headline models. These are descriptive local
+fixed-window diagnostics on a simulated signal mixture. A small pre-cut
+excess does not establish calibrated false-positive control. No discovery
+significance, global search significance or detector-data sensitivity is claimed.
 
 \begin{table}[t]
 \centering
-\caption{Bump-hunt local significance $Z$ (Gaussian $+$ exponential
-  background fit to $\mjj$ spectrum) for Deep SAD and Supervised
-  MLP across three seeds. The injected signal prevalence is $0.5\%$.}
+\caption{\textbf{Bump-hunt local diagnostic.} Local excess statistic $Z$ from a
+  binned Poisson sideband fit with propagated background-fit uncertainty,
+  for Deep SAD and the supervised MLP. Signal injection is 0.5\% of the
+  background count, corresponding to approximately 0.498\% mixture prevalence.}
 \label{tab:bumphunt}
 \setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{lc ccc}
 \toprule
 Model & Seed & Pre-cut & @10\% eff. & @1\% eff. \\
 \midrule
-M4: DeepSAD & 42 & 0.00 & 5.26 & 8.63 \\
-M4: DeepSAD & 43 & 0.00 & 5.55 & 10.42 \\
-M4: DeepSAD & 44 & 0.03 & 5.97 & 10.57 \\
-\midrule
+M4: Deep SAD & 42 & 0.00 & 5.89 & 7.58 \\
+M4: Deep SAD & 43 & 0.00 & 4.71 & 5.80 \\
+M4: Deep SAD & 44 & 0.03 & 4.13 & invalid fit \\
+M4: Deep SAD & 45 & 0.00 & 4.95 & 7.51 \\
+M4: Deep SAD & 46 & 0.00 & 4.87 & 8.43 \\
 M5: Supervised & 42 & 0.00 & 6.63 & 13.69 \\
 M5: Supervised & 43 & 0.00 & 6.66 & 14.71 \\
 M5: Supervised & 44 & 0.03 & 7.76 & 14.86 \\
+M5: Supervised & 45 & 0.00 & 6.59 & 13.76 \\
+M5: Supervised & 46 & 0.00 & 6.32 & 13.96 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Deep SAD consistently achieves local significance $Z > 8\sigma$ after
-the $1\%$ background efficiency cut, well above the 5$\sigma$
-discovery threshold. No significant excess is observed in the pre-cut
-background ($Z < 0.1$), confirming negligible false excess from the
-underlying spectrum.
+\subhead{Failure modes}
+\runin{Deep SVDD hypersphere collapse}
+\textbf{Established in this benchmark:} Deep SVDD (M3) has near-random
+nominal-signal ranking under the released implementation.\cite{Ruff2018}
+\textbf{Plausible explanation:} low-variance embeddings and vanishing
+gradients in a multilayer bias-free network could contribute to this
+behaviour. The centre is initialised from training embeddings and its small
+components are clamped away from zero; it is not fixed to a uniform vector.
+No systematic centre/activation ablation record is included in this release.
+The numerical result therefore does not establish a universal architectural
+failure of Deep SVDD on tabular data.
 
-% =========================================================
-\section{Failure Mode Analysis}
-\label{sec:failures}
+\runin{Deep SAD label-assignment error}
+The original training script incorrectly assigned $y=1$ (labelled
+anomaly) to all signal events injected as unlabelled contamination,
+rather than only to the $\klabels$ explicitly drawn labelled events.
+This gave Deep SAD spurious positive labels and created an
+artificial performance gain at $\ftrain > 0$, violating the
+assumptions of semi-supervised learning. After the fix, unlabelled injected
+events correctly receive $y=0$ (\cref{eq:sad}), and the contamination
+benefit is attributed to the shift in the training-data distribution
+rather than to falsely labelled anomalies.
 
-\subsection{Deep SVDD Hypersphere Collapse}
-\label{sec:svdd_collapse}
+\subhead{Mass-decorrelated and resonant-search baselines}
+The remaining detectors in \cref{tab:headline} (M7--M12) address two of the questions posed in
+the Introduction: whether explicit mass decorrelation helps, and how resonant-search
+strategies compare with the substructure-based detectors.
 
-Deep SVDD (M3) collapses to a near-random detector ($\auc \approx
-0.49$) on this dataset. The root cause is a degenerate
-$W = 0$ fixed point arising from three co-occurring conditions:
+The MD-SWAD implementations (M9 and M10) are exploratory extensions.
+Their earlier numerical summaries are [unverified]: no matching multi-seed
+evaluation table accompanies the saved checkpoints. They are excluded from
+the final quantitative comparison. Explicit decorrelation is therefore a
+candidate extension rather than an established result of this release.
 
-\begin{enumerate}
-\item \emph{Zero-centred inputs}: \code{StandardScaler} centres each
-  feature to zero mean.
-\item \emph{Bias-free linear layers}: the bias-free constraint required
-  by SVDD theory permits $W = 0$ as a valid weight configuration.
-\item \emph{Fixed centre at} $c = 0.1 \cdot \mathbf{1}$: with
-  $\phi(x) \approx 0$ for all $x$ when $W \to 0$, the SVDD loss
-  $\|\phi(x) - c\|^2 = \|c\|^2$ is a constant and gradients vanish.
-\end{enumerate}
+The resonant-search baselines trail Isolation Forest (M2, $\auc = \IFMean$). ANODE with a Gaussian
+mixture (M8) reaches $\auc = 0.720$, CWoLa Hunting (M7) $0.605$ and its tree-based variant
+(M12) $0.575$, while the CATHODE (CVAE) proxy (M11) performs at chance level
+($\auc = 0.481$, with $1/\eB = 1.2$ at every signal efficiency). M7, M8 and M12 also sculpt
+the mass spectrum strongly ($\jsd = 0.189$, $0.058$ and $0.189$; $\rho = 0.433$, $0.337$ and
+$0.450$), consistent with their use of $\mjj$-defined regions in training. Because M8, M11 and M12 are
+simplified proxies of the published methods (Methods), these numbers characterise my
+implementations rather than the methods themselves.
 
-The network converges rapidly to $W = 0$, producing a constant
-anomaly score $\approx \|c\|^2 = 0.01d$, and thus random
-discrimination. Replacing \code{LeakyReLU(0.1)} with \code{ReLU}
-partially breaks the symmetry ($\auc$ improves from $0.474$ to
-$0.493$) but does not fully resolve the collapse for tabular data
-with a near-symmetric input distribution.
-
-\subsection{Deep SAD Label Contamination Bug}
-\label{sec:sad_bug}
-
-The original training script incorrectly assigned $y=1$ (labeled
-anomaly) to all signal events that were injected as unlabeled
-contamination, rather than only to the $\klabels$ explicitly drawn
-labeled events. This bug caused Deep SAD to receive spurious positive
-labels from contamination events, creating an artificial performance
-gain with $\ftrain > 0$ that violated semi-supervised learning
-assumptions. After the fix, unlabeled-injected events correctly
-receive $y=0$ (\cref{eq:sad}), and the contamination benefit is
-appropriately attributed to the shift in the training data distribution
-rather than to falsely labeled anomalies.
-
-% =========================================================
-\section{Generalisation to Unseen Signal Topology}
-\label{sec:generalisation}
-
-We evaluate all headline models on the held-out 3-prong signal sample
-($X \to YY \to qqq$) to assess generalisation beyond the 2-prong
-training target. \Cref{fig:generalisation} shows the 3-prong AUC vs.\
-the 2-prong AUC for all seeds and headline configurations.
+\subhead{Generalisation to an unseen signal topology}
+I evaluate all headline models on the held-out three-prong signal sample
+($X \to YY \to qqq$) to assess generalisation beyond the two-prong
+training target. \Cref{fig:generalisation} shows the three-prong AUC against
+the two-prong AUC for all seeds and headline configurations, and
+\cref{tab:generalisation} gives the quantitative comparison.
+The supervised MLP (M5) has the smallest generalisation gap
+(see the measured gaps in the table), suggesting that the learned $\tautwo$ and jet-mass
+discriminants partially transfer to the three-prong topology. Deep SAD
+(M4) shows a larger gap, indicating that sparse
+labelling is sufficient to learn partly topology-agnostic anomaly features.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/generalisation_scatter.png}
-  \caption{Generalisation to the unseen 3-prong signal topology.
-    Points above the dashed diagonal generalise better to 3-prong
-    than to 2-prong. Deep SAD~(M4) maintains the best combination
-    of 2-prong and 3-prong AUC among unsupervised/semi-supervised
+  \figbox{figures/generalisation_scatter.png}
+  \caption{\textbf{Generalisation to the unseen three-prong topology.}
+    Points above the dashed diagonal generalise better to three-prong
+    than to two-prong signal. Deep SAD (M4) maintains the best combination
+    of two-prong and three-prong AUC among the unsupervised and semi-supervised
     methods.}
   \label{fig:generalisation}
 \end{figure}
 
-\Cref{tab:generalisation} provides the full quantitative comparison.
-The Supervised MLP (M5) maintains the smallest generalisation gap
-($-0.037$), suggesting that the learned $\tautwo$ and jet-mass
-discriminants partially transfer to the 3-prong topology. Deep SAD
-(M4) also shows a reasonable gap ($-0.110$), confirming that sparse
-labeling is sufficient to learn topology-agnostic anomaly features.
-
 \begin{table}[t]
 \centering
-\caption{Generalisation study: 2-prong AUC (training target) vs.\
-  3-prong AUC (held-out, never seen during training). Values are
-  mean $\pm$ std over seeds 42--44. Generalisation gap = AUC$_{3p}$
-  $-$ AUC$_{2p}$.}
+\caption{\textbf{Generalisation study.} Two-prong AUC (training target) versus
+  three-prong AUC (held out, never seen during training), as five seeds 42--46.
+  Generalisation gap = AUC$_{3p}$ $-$ AUC$_{2p}$. $^*$A positive gap is accidental: SVDD collapse produces
+  a near-random two-prong score that happens to correlate with three-prong substructure.}
 \label{tab:generalisation}
 \begin{tabular}{lccc}
 \toprule
 Model & AUC (2-prong) & AUC (3-prong) & Gap \\
 \midrule
-M1: AE     & $0.657{\pm}0.076$ & $0.575{\pm}0.013$ & $-0.082$ \\
-M2: IF     & $0.806{\pm}0.009$ & $0.681{\pm}0.029$ & $-0.125$ \\
-M3: SVDD   & $0.493{\pm}0.011$ & $0.621{\pm}0.003$ & $+0.128^*$ \\
-M4: SAD    & $0.934{\pm}0.001$ & $0.824{\pm}0.008$ & $-0.110$ \\
-M5: Sup.   & $0.966{\pm}0.000$ & $0.929{\pm}0.001$ & $-0.037$ \\
-M6: SVDD+$m$ & $0.523{\pm}0.025$ & $0.654{\pm}0.014$ & $+0.131^*$ \\
+M1: Autoencoder & $0.718\pm0.074$ & $0.597\pm0.103$ & $-0.121$ \\
+M2: Isolation Forest & $0.807\pm0.008$ & $0.683\pm0.021$ & $-0.124$ \\
+M3: Deep SVDD & $0.500\pm0.007$ & $0.617\pm0.011$ & $+0.117$ \\
+M4: Deep SAD & $0.888\pm0.011$ & $0.749\pm0.061$ & $-0.139$ \\
+M5: Supervised & $0.966\pm0.000$ & $0.929\pm0.001$ & $-0.037$ \\
+M6: Mass-aware SVDD & $0.515\pm0.010$ & $0.667\pm0.023$ & $+0.152$ \\
 \bottomrule
 \end{tabular}
-\begin{flushleft}
-\footnotesize $^*$Positive gap is accidental: SVDD collapse produces
-a near-random 2-prong score that happens to correlate with 3-prong
-substructure.
-\end{flushleft}
 \end{table}
 
-\paragraph{Extended $\tau_{32}$ features.}
-Adding $\tauthree$ to the feature vector (\cref{sec:extfeatures}) is
-expected to improve the 3-prong AUC by providing a variable directly
-sensitive to 3-prong substructure. With the 5-feature baseline,
-$\tautwo$ alone cannot distinguish $X \to YY \to qqq$ from QCD at the
-$\tautwo$-optimal threshold; $\tauthree < 1$ in a boosted 3-prong jet
-provides the additional discriminating power.
+\runin{Extended $\tau_{32}$ features}
+\textbf{Plausible extension:} $\tauthree$ measures three-subjettiness relative
+to two-subjettiness and may add information about three-prong substructure.\cite{Thaler2011}
+The extended cache is available, but this release contains no matched
+five-seed comparison establishing an AUC improvement from these inputs.
+
+\subhead{Constituent-level representation and external signal}
+To test an event representation beyond the five- and seven-feature inputs, I trained a
+masked, permutation-invariant Deep Sets autoencoder on raw particle constituents. Each
+event contains up to 700 $(p_T,\eta,\phi)$ triples, transformed into six channels:
+$p_T/\sum p_T$, $\log(p_T/p_{T,\max})$, $\log(1+p_T)$, scaled $\eta$,
+$\sin\phi$ and $\cos\phi$. The model was trained for eight epochs on a seeded subset
+of 50,000 events from the 599,952-event background training partition; the best
+validation-loss checkpoint was retained. A threshold for 1\% validation background
+acceptance was fixed before testing. On the full original test pools, the two-prong and
+three-prong AUCs were 0.498 and 0.441, with signal efficiencies of 0.160\% and 0.098\%
+at that threshold. This run shows no useful separation from the constituent-level score.
+
+I also evaluated all 44,673 events in the external $X\to YY'\to 4q$ sample
+(2+2-prong topology) released with additional LHCO signal models.\cite{AdditionalSignals2026}
+Against a seeded 20,000-event subset of held-out background, the AUC was 0.465 and the
+signal efficiency at the frozen threshold was 0.159\%. This sample was not used in
+training or threshold selection, and its generator chain differs from the original R\&D
+benchmark. It is therefore reported as an external evaluation, not pooled with the
+nominal benchmark.
+
+The second external $W_{KK}\to WR\to3W$ sample has a 2+4-prong topology.
+Its archive matches the published MD5 checksum; all 32,801 events were scored
+with the same frozen checkpoint. Against the same seeded 20,000-event held-out
+background subset, the AUC was 0.507 and the signal efficiency at the frozen
+1\% threshold was 0.280\%. This near-random result is reported separately
+because the generation chain differs from the original R\&D benchmark.
+
+\subhead{Density-score calibration and background-only closure}
+For the ANODE-style GMM, 128,112 held-out background events in the mass sidebands were
+split into independent calibration and evaluation halves of 64,056 events each. I
+converted the negative log-density score $s$ to an upper-tail conformal $p$-value,
+$p=(1+\#\{s_i^{\rm cal}\geq s\})/(n_{\rm cal}+1)$. Under exchangeability of the
+calibration and evaluation background, this gives finite-sample calibrated score
+$p$-values.\cite{ShaferVovk2008} The evaluation values were consistent with uniformity
+(KS statistic 0.0043, $p=0.179$); observed rates below 1\%, 5\% and 10\% were 1.054\%,
+4.975\% and 9.868\%. This calibrates the anomaly-score tail for sideband background,
+not an absolute density or a signal-region conditional density. Consistent with this
+distinction, the raw GMM Rosenblatt-PIT marginals remained nonuniform on the evaluation
+half (KS statistics 0.026--0.052, all $p<10^{-38}$).
+
+As a background-only closure check, I generated 500 Poisson-bootstrap pseudoexperiments
+from held-out background, froze each detector threshold using validation background,
+and repeated the local sideband fit. At the 1\% operating point, the 95th-percentile
+local significances were 1.86 (M1), 1.19 (M2) and 1.51 (M11); the fractions with
+$Z\geq3$ were 0/461, 0/479 and 1/456 among valid fits. These are local conditional
+closure results for the released simulation and chosen fit, not global significance
+estimates or detector-systematic closure.
 
 % =========================================================
-\section{New Baselines}
-\label{sec:baselines}
+\section{Discussion}
 
-\subsection{CWoLa Hunting (M7)}
-\label{sec:cwola}
+I have presented a benchmark of unsupervised and semi-supervised
+anomaly detection on the LHCO 2020 R\&D dataset. Weak supervision is
+highly label-efficient: with $\klabels = 100$ labelled anomalies, Deep SAD
+achieves $\auc = \SADMean$, recovering much of the AUC gap between the best
+unsupervised baseline (Isolation Forest, $\auc = \IFHeadline$) and the
+supervised reference ($\auc = \SupMean$). Its fixed-window local diagnostics on
+the simulated signal mixture are reported separately from its measured
+mass sculpting ($\jsd = \SADJSD$). Isolation Forest is the best learned
+unsupervised detector on this five-dimensional feature set and is robust
+to training contamination. Deep SVDD, by contrast, collapses on zero-centred
+tabular data in this implementation. The mechanism remains uncertain and
+the limited implementation comparison warrants caution when
+applying SVDD to standardised tabular data in high-energy physics. Generalisation
+to an unseen three-prong topology is partial but meaningful: Deep SAD
+retains $\auc = \SADTransferMean$ without any three-prong training events.
 
-CWoLa~\cite{Collins2019} (Classification Without Labels) exploits the
+These results offer practical guidance, though they must be interpreted within the
+scope of a simulation-only benchmark. The headline comparisons use low-dimensional
+features and a nominal signal; follow-up tests add one external signal and a
+constituent-level model but do not establish broad signal-model coverage. Within the
+headline regime,
+Isolation Forest is a sensible unsupervised baseline: it
+needs no signal assumption, trains in minutes and is robust to contamination
+up to $1\%$. Deep SAD should be preferred over Deep SVDD for similar tabular feature sets,
+because it performs better in this measured setup; this is not a claim that
+the repulsion term removes all degenerate fixed points.
+For the two-prong signal studied here, 100 labelled examples improve on the
+learned unsupervised baseline, while the seed-42 grid shows additional gains
+with 1,000 labels. A repeated-seed grid would be needed to establish the
+trade-off between label cost and performance.
+
+Mass sculpting must be evaluated carefully before any score cut is deployed. Deep SAD and
+Isolation Forest showed acceptable JSD ($< 0.03$) at $10\%$ background efficiency in this
+five-feature space, but the autoencoder and mass-aware SVDD would require additional
+decorrelation in any production search, such as distance correlation\cite{Kasieczka2020}
+or adversarial training.\cite{Louppe2017,Shimmin2017} The exploratory MD-SWAD
+implementations require a verified repeated-seed evaluation before their
+discrimination--decorrelation trade-off can be quantified.
+Resonant methods designed to avoid background sculpting are discussed in
+Ref.~\citenum{Hallin2023}. The seven-feature $\tauthree$ dataset remains a
+candidate for direct high-level model evaluation. The separate constituent-level
+Deep Sets test reported here did not improve discrimination, showing that higher
+input dimensionality alone is insufficient.
+
+In principle, CWoLa Hunting is complementary to the substructure-based scores, because it uses the
+$\mjj$ window as a physics-motivated weak label. In this study, however, the simplified
+resonant-search baselines (M7, M8, M11 and M12) all trailed Isolation Forest and, for M7, M8 and M12,
+sculpted the mass spectrum strongly. They should be revisited with full implementations,
+such as normalising-flow density estimators, before any conclusion is drawn about the published methods.
+The original M0--M12 comparison uses five- or seven-feature inputs; the follow-up
+Deep Sets model instead processes up to 700 constituents with six channels per
+constituent, but its AUCs remain near or below chance. These results provide a
+low-level reference point alongside the high-level baselines for future collider
+anomaly-detection studies, including emerging quantum approaches.\cite{Ngairangbam2022,Alvi2023}
+
+% =========================================================
+\section{Methods}
+
+\runin{Dataset}
+The LHCO 2020 R\&D dataset\cite{Kasieczka2021,Kasieczka2019data} consists of
+1,100,000 dijet events: 1,000,000 QCD background events produced with
+Pythia\,8\cite{Sjostrand2015} and Delphes,\cite{deFavereau2014} and
+100,000 signal events from the process $W' \to XY$,
+$X \to q\bar{q}$ and $Y \to q\bar{q}$, at $m_{W'} = 3.5$~TeV,
+$m_X = 500$~GeV and $m_Y = 100$~GeV. The signal produces a
+characteristic two-pronged topology in each of the two leading jets.
+A second, held-out signal sample with a three-prong topology
+($W' \to XY$, $X,Y \to qqq$, with the same particle masses) is used exclusively for
+the generalisation evaluation. Events are split into disjoint training,
+validation and test sets (\cref{tab:splits}). Training-set signal events
+are used only when explicitly injected (contamination studies) or
+labelled (Deep SAD and supervised models).
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Dataset splits.} Event counts used throughout this study.}
+\label{tab:splits}
+\begin{tabular}{lcc}
+\toprule
+Split & Background & Signal (2-prong) \\
+\midrule
+Train & 599,952 & 59,983 \\
+Validation & 199,984 & 19,994 \\
+Test & 199,984 & 19,996 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\runin{Feature extraction}
+High-level features are derived from the two leading anti-$k_T$ jets\cite{Cacciari2008}
+($R = 1.0$), using FastJet\cite{Cacciari2012} and the official FastJet-contrib N-subjettiness
+implementation.\cite{Thaler2011} The five standard features used by
+all models are listed in \cref{tab:features}. The dijet invariant mass
+$\mjj$ is deliberately withheld from the standard feature set to prevent
+trivial mass sculpting; it is used only by mass-aware SVDD (M6), CWoLa (M7, M12), ANODE (M8), MD-SWAD (M9, M10), and CATHODE (M11). All features are standardised (zero mean, unit variance)
+with a \code{StandardScaler}\cite{Pedregosa2011} fitted on the background training set only,
+never on signal events.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Standard five-feature set.} Feature indices 0--4.}
+\label{tab:features}
+\begin{tabular}{clP{7cm}}
+\toprule
+Idx & Feature & Description \\
+\midrule
+0 & $m_{J_1}$ & Leading-jet invariant mass [GeV] \\
+1 & $|\Delta m_J|$ & Jet-mass asymmetry $|m_{J_1}-m_{J_2}|$ [GeV] \\
+2 & $\tautwo^{J_1}$ & 2-to-1 N-subjettiness, leading jet \\
+3 & $\tautwo^{J_2}$ & 2-to-1 N-subjettiness, sub-leading jet \\
+4 & $\drjj$ & Angular separation of the two jets \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\runin{Extended feature set}
+For the generalisation study, I additionally compute the 3-to-2
+N-subjettiness ratio $\tauthree^{J_{1,2}} = \tau_3/\tau_2$ for both jets,
+extending the feature vector to seven dimensions. This variable directly
+discriminates three-prong decay products from QCD dijets. The extended dataset is
+stored at \code{data/processed/events\_v2\_extended\_features.h5}.
+
+\runin{Raw-particle extension}
+The separate constituent-level study reads up to 700 raw $(p_T,\eta,\phi)$ triples
+per event and maps each particle to six channels: $p_T/\sum p_T$,
+$\log(p_T/p_{T,\max})$, $\log(1+p_T)$, scaled $\eta$, $\sin\phi$ and
+$\cos\phi$. A shared particle encoder is followed by masked mean and maximum
+pooling, an event embedding, and a per-particle decoder. The event anomaly score is
+the mean squared reconstruction error over valid particles; it is a ranking score,
+not a likelihood. Training uses background only: 50,000 seeded events from a
+599,952-event training partition for eight epochs. The checkpoint with the lowest
+validation loss is kept, and the score threshold is fixed at the validation 99th
+percentile with randomized acceptance at tied scores. All original test pools are
+scored. The additional $X\to YY'\to4q$ sample contains 44,673 events and comes from
+Zenodo record 18983506;\cite{AdditionalSignals2026} its AUC is measured against a
+seeded 20,000-event subset of held-out background. The external
+$W_{KK}\to WR\to3W$ sample from the same record contains 32,801 events and is
+evaluated with the same checkpoint, background subset and threshold.
+
+\runin{Conformal density-score calibration}
+For the ANODE-style GMM, held-out background events in the 2.5--3.3 and
+3.7--4.5~TeV sidebands are divided into disjoint calibration and evaluation halves.
+For evaluation score $s$, the upper-tail conformal $p$-value is
+$(1+\#\{s_i^{\rm cal}\geq s\})/(n_{\rm cal}+1)$, with ties counted
+conservatively. Its finite-sample validity requires exchangeability between these
+two background halves.\cite{ShaferVovk2008} The resulting values calibrate the score
+tail for sideband background only; they are not an absolute density estimate and
+do not establish transfer to the signal region.
+
+\runin{Background-only closure}
+For M1, M2 and M11, validation-background thresholds are frozen before generating
+500 Poisson-bootstrap pseudoexperiments from held-out background. Score ties at the
+cut use randomized boundary acceptance. The local sideband fit is repeated for each
+trial; failed or saturated fits are excluded, so the valid count is reported for
+each model and working point. This conditional simulation closure does not include
+detector systematics, alternative background generators or a global search.
+
+\runin{Model architectures}
+SVDD and SAD use bias-free layers with architecture
+$5 \to 64 \to 32 \to 16$. The autoencoder has an encoder
+$5 \to 64 \to 32 \to 16$ and a symmetric decoder, with biases and
+LeakyReLU activations. The supervised reference uses biased layers
+$5 \to 64 \to 32 \to 1$ with ReLU activations. The mass-aware model
+has six inputs; the hidden widths are otherwise unchanged.
+
+\runin{Loss functions}
+The autoencoder (M1) minimises the mean-squared reconstruction error,
+\begin{equation}
+\mathcal{L}_{\mathrm{AE}} = \frac{1}{n}\sum_{i=1}^n \|x_i - \hat{x}_i\|^2 .
+\end{equation}
+Deep SVDD\cite{Ruff2018} (M3) minimises the mean squared distance from a
+fixed centre $c$,
+\begin{equation}
+\mathcal{L}_{\mathrm{SVDD}} = \frac{1}{n}\sum_{i=1}^n \|\phi(x_i) - c\|^2 .
+\end{equation}
+Deep SAD\cite{Ruff2020} (M4) extends this with an inverse-distance
+penalty for labelled anomalies ($y_i = 1$),
+\begin{equation}
+\mathcal{L}_{\mathrm{SAD}} = \frac{1}{n}\sum_{y_i=0}\|\phi(x_i)-c\|^2
+  + \frac{\eta}{n}\sum_{y_i=1}\left(\|\phi(x_i)-c\|^2\right)^{-1},
+\label{eq:sad}
+\end{equation}
+where $\eta > 0$ controls the strength of the anomaly repulsion. Unlabelled
+events ($y_i = 0$) include both background training events and any
+signal events injected without labels.
+To resolve the Deep SVDD collapse and explicitly decorrelate the latent representation from the dijet mass $\mjj$, I propose the Mass-Decorrelated Sliced Wasserstein Anomaly Detector (MD-SWAD, M9). MD-SWAD maps the background directly onto a standard normal target distribution using the sliced Wasserstein distance (SWD),\cite{Bonneel2015,Kolouri2019} and adds a distance-correlation (DisCo) penalty\cite{Kasieczka2020,Szekely2007}, weighted by $\lambda$, that decorrelates the embedding from $\mjj$:
+\begin{equation}
+\mathcal{L}_{\mathrm{MD-SWAD}} = \mathrm{SWD}(\phi(X_{y=0}), \mathcal{N}(0, I)) + \lambda \cdot \mathrm{dCor}^2(\phi(X_{y=0}), \mjj).
+\end{equation}
+For the semi-supervised variant (MD-SWAD-SAD, M10), the Deep SAD repulsion term for the labelled anomalies ($y_i = 1$) is added to push them away from the origin:
+\begin{equation}
+\mathcal{L}_{\mathrm{MD-SWAD-SAD}} = \mathcal{L}_{\mathrm{MD-SWAD}} + \frac{\eta}{n}\sum_{y_i=1}\left(\|\phi(x_i)\|^2\right)^{-1}.
+\end{equation}
+
+\runin{Training protocol}
+All neural models are implemented in PyTorch\cite{Paszke2019} and trained with Adam\cite{Kingma2015}
+(learning rate $10^{-3}$, weight decay $10^{-5}$), a batch size of 256 and
+early stopping with patience 8 on the validation loss. The checkpoint
+with the lowest validation objective is selected. Five seeds
+(42--46) are used for the six core headline comparisons;
+supplemental baselines are single-seed exploratory evaluations.
+The final core results use 47 fresh fits in an isolated Python 3.11 CPU environment;
+dependency versions and the staged 33-minute verification are recorded in the repository.
+Historical neural results differ and are preserved separately. For the final seed-42
+detectors, 500 stratified paired-bootstrap trials on 199,984 background and 19,996
+signal test events provide separate AUC intervals in the released machine-readable
+tables. These finite-test intervals are conditional on the fitted models and are
+not combined with training-seed standard deviations.
+
+\runin{Contamination and label budget}
+The training contamination $\ftrain$ is the number of unlabelled signal
+events injected into the training set, expressed as a fraction of the
+background training pool size ($N_\mathrm{bkg}=599{,}952$). For example,
+$\ftrain = 0.5\%$ adds $2{,}999$ signal events to the training set without
+labels. The label budget $\klabels$ (Deep SAD only) is the number of distinct signal
+events assigned a positive label ($y=1$) from the remaining training-signal pool. These
+events are drawn after the contamination injection and are
+mutually exclusive with the unlabelled injected events.
+
+\runin{Evaluation metrics}
+I report the area under the receiver-operating-characteristic curve (AUC)
+together with the background rejection $1/\eB$ at signal
+efficiencies $\eS \in \{10\%, 30\%, 50\%\}$. The maximum significance
+improvement characteristic is
+\begin{equation}
+\sic_\mathrm{max} = \max_t \frac{\eS(t)}{\sqrt{\eB(t)}} .
+\end{equation}
+Mass sculpting is quantified by the Jensen--Shannon divergence
+\begin{equation}
+\jsd(P \| Q) = \frac{1}{2} D_{\mathrm{KL}}(P\|M) + \frac{1}{2} D_{\mathrm{KL}}(Q\|M),
+\end{equation}
+where $M = (P+Q)/2$, $P$ is the normalised inclusive background
+$\mjj$ distribution and $Q$ is the normalised $\mjj$ distribution
+after a score cut at a fixed background efficiency; $\jsd = 0$ means
+no sculpting. I also report the Pearson correlation coefficient
+$\rho(s, \mjj)$ between anomaly scores $s$ and $\mjj$ on the background
+test sample, for which $|\rho| \to 0$ is ideal. The bump-hunt significance is
+the local excess statistic $Z$ with propagated background-fit uncertainty.
+The background expectation comes from a binned Poisson fit to sidebands
+in 2.5--4.5~TeV, excluding the fixed 3.3--3.7~TeV window. The log-background
+model uses the basis $1$, $\log(1-x)$, $-\log x$ and $-(\log x)^2$, with
+$x=\mjj/(13~\mathrm{TeV})$. No Gaussian signal template is fitted.
+Definitions of all metrics are
+collected in Supplementary Table~\ref{tab:metrics}.
+
+\runin{Additional baselines}
+CWoLa Hunting\cite{Metodiev2017,Collins2018,Collins2019} (M7; Classification Without Labels) uses the
 $\mjj$ distribution to define a signal region (SR: $3300$--$3700$~GeV)
 and sidebands (SB: $2500$--$3300$ and $3700$--$4500$~GeV). A
-classifier trained on the SR vs.\ SB labels learns to separate signal
+classifier trained to separate SR from SB events learns to isolate signal
 (preferentially in the SR) from background, using $\mjj$ as a
-surrogate label rather than a direct anomaly tag. This approach is
-entirely model-agnostic and requires no signal simulation.
-
-Our implementation uses a compact MLP ($5 \to 64 \to 64 \to 1$,
-\code{ReLU} activations, \code{BCEWithLogitsLoss}) trained only on
-events within the SR+SB window. CWoLa is activated by the config flag
-\code{use\_mjj: true} in \code{m7\_cwola.yaml}.
-
-\subsection{ANODE Density Estimator (M8)}
-\label{sec:anode}
-
-ANODE~\cite{Nachman2020} estimates the background density from
-sideband events and scores anomalies by the likelihood ratio
-$p_{\mathrm{SR}}(x)/p_{\mathrm{SB}}(x)$. Our implementation
-approximates the sideband density with a 5-component Gaussian Mixture
-Model (GMM) fitted on $x \in \mathrm{SB}$, and uses the score
-$-\log p_{\mathrm{SB}}(x)$ as a proxy for the likelihood ratio. Full
-ANODE with normalising flows~\cite{Papamakarios2021} would provide a
+surrogate label rather than a direct anomaly tag. The approach is
+model-agnostic and requires no signal simulation. My implementation
+uses a compact MLP ($5 \to 64 \to 64 \to 1$, \code{ReLU} activations,
+\code{BCEWithLogitsLoss}) trained only on events within the SR+SB window,
+and is activated by the configuration flag \code{use\_mjj: true} in
+\code{m7\_cwola.yaml}. ANODE\cite{Nachman2020} (M8) estimates the
+background density from sideband events and scores anomalies by the
+likelihood ratio $p_{\mathrm{SR}}(x)/p_{\mathrm{SB}}(x)$. My implementation
+approximates the sideband density with a five-component Gaussian mixture
+model (GMM) fitted on $x \in \mathrm{SB}$ and uses the score
+$-\log p_{\mathrm{SB}}(x)$ as a proxy for the likelihood ratio. A full ANODE
+implementation with normalising flows\cite{Papamakarios2021} would give a
 more accurate density estimate, particularly near the SR boundary.
 
-% =========================================================
-\section{Discussion and Recommendations}
-\label{sec:discussion}
-
-Our results lead to the following practical guidance for deploying
-anomaly detection in an LHC analysis:
-
-\begin{enumerate}
-
-\item \textbf{Use Isolation Forest as the unsupervised baseline.}
-  With no signal assumption and $\mathcal{O}(\mathrm{minutes})$ of
-  training, IF achieves $\auc = 0.806$ — the best purely unsupervised
-  result — and is robust to training contamination up to $1\%$.
-
-\item \textbf{Prefer Deep SAD over Deep SVDD.}
-  Deep SVDD collapses on standardised tabular features, producing
-  near-random discrimination regardless of training contamination.
-  Deep SAD avoids collapse because labeled anomaly repulsion
-  (\cref{eq:sad}) prevents the $W = 0$ fixed point.
-
-\item \textbf{The efficient label budget is $k \approx 100$.}
-  The marginal AUC gain from $\klabels = 10 \to 100$ exceeds the
-  gain from $\klabels = 100 \to 1000$. In a realistic setting where
-  a small MC signal sample or manually tagged events are available,
-  $\klabels = 100$ provides near-optimal semi-supervised performance.
-
-\item \textbf{Evaluate mass sculpting before deploying a score cut.}
-  Deep SAD and IF have acceptable JSD ($< 0.03$) at $10\%$ background
-  efficiency. The Autoencoder and Mass-Aware SVDD should be used with
-  additional decorrelation (e.g., DisCo~\cite{Kasieczka2020} or
-  adversarial training) in any production search.
-
-\item \textbf{Add $\tauthree$ for 3-prong searches.}
-  The extended 7-feature dataset (\cref{sec:extfeatures}) is
-  production-ready and expected to improve sensitivity to boosted
-  multi-body decay topologies by $\mathcal{O}(5\text{--}10\%)$ in AUC.
-
-\item \textbf{CWoLa Hunting is complementary.}
-  M7 uses the $\mjj$ window as a physics-motivated weak label,
-  independently of the substructure-based anomaly score. It should be
-  deployed alongside density-based methods for cross-validation of a
-  potential signal excess.
-
-\end{enumerate}
+CATHODE\cite{Hallin2022} (M11) normally replaces the sideband density model with flow-based
+sampling of the background in the signal region, and then trains a classifier to distinguish
+data from the synthetic background. Because a full implementation requires a normalising flow, I
+implemented a computationally tractable proxy, CATHODE (CVAE), in which a conditional variational
+autoencoder\cite{Sohn2015,KingmaWelling2014} generates the pseudo-background in place of the flow.
+Finally, CWoLa Trees (M12) follows the same weak-supervision methodology as M7 but replaces the
+neural network with a histogram-based gradient-boosting classifier,\cite{Pedregosa2011} a standard
+tree-based weakly supervised baseline.\cite{Finke2024}
+The $\tautwo$-cut baseline (M0) scores events by $-(\tautwo^{J_1}+\tautwo^{J_2})$.
 
 % =========================================================
-\section{Conclusions}
-\label{sec:conclusions}
+\section*{Data availability}
+The LHC Olympics 2020 R\&D dataset is publicly available from the challenge organisers.\cite{Kasieczka2021,Kasieczka2019data}
+The external $X\to YY'\to4q$ and $W_{KK}\to WR\to3W$ signal samples used in the follow-up evaluations are available from Zenodo record 18983506.\cite{AdditionalSignals2026}
+Derived feature files and results supporting this study are available at the repository given below.
 
-We have presented a comprehensive benchmark of unsupervised and
-semi-supervised anomaly detection on the LHC Olympics 2020 R\&D
-dataset. Our principal findings are:
+\section*{Code availability}
+All code, configurations and results are available in the
+\href{https://github.com/lihtim-kitsa/lhc-olympics-2020}{public project repository}.
 
-\begin{itemize}
+\section*{Acknowledgements}
+I thank the LHC Olympics 2020 organisers for the benchmark dataset
+and the open-source machine learning community for the PyTorch, scikit-learn
+and FastJet libraries.
 
-\item \textbf{Weak supervision is highly label-efficient.} Deep SAD
-  with $\klabels = 100$ labeled anomaly events achieves $\auc = 0.934$,
-  closing $>90\%$ of the AUC gap between the best unsupervised
-  baseline (IF, $\auc = 0.806$) and the supervised oracle
-  ($\auc = 0.966$).
+\section*{Author contributions}
+M.H.A. is the sole author of this work. M.H.A. conceived the study, developed the software, performed the experiments and analysis, interpreted the results, and wrote the manuscript.
 
-\item \textbf{Isolation Forest is the best unsupervised detector} on
-  this five-dimensional jet substructure feature set, with AUC $= 0.806
-  \pm 0.009$ across seeds and robust to training contamination.
+\section*{Competing interests}
+The author declares no competing interests.
 
-\item \textbf{Deep SVDD collapses} on zero-centred tabular data due to
-  a degenerate $W=0$ fixed point. This is a fundamental architectural
-  limitation, not a hyperparameter issue, and warrants caution when
-  applying SVDD to standardised tabular HEP data.
-
-\item \textbf{Deep SAD achieves discovery-level bump-hunt significance}
-  ($Z > 8\sigma$ at $1\%$ background efficiency) with excellent mass
-  sculpting control ($\jsd \approx 0.013$).
-
-\item \textbf{Generalisation to unseen 3-prong topology is partial but
-  meaningful.} Deep SAD maintains $\auc = 0.824$ on the 3-prong signal
-  without any 3-prong training events; adding $\tauthree$ is expected
-  to improve this further.
-
-\end{itemize}
-
-All code, configs, and results are available at:
-\url{https://github.com/lihtim-kitsa/lhc-olympics-2020}.
+\section*{Additional information}
+\textbf{Supplementary information} accompanies this paper.\\
+\textbf{Correspondence} and requests for materials should be addressed to Mithil Hardik Astik.
 
 % =========================================================
-\begin{acknowledgments}
-We thank the LHC Olympics 2020 organisers for the benchmark dataset
-and the open-source machine learning community for the PyTorch, scikit-learn,
-and FastJet libraries. We acknowledge useful discussions with colleagues
-at [Institution].
-\end{acknowledgments}
+\begingroup
+\small
+\begin{thebibliography}{99}
+
+\bibitem{Karagiorgi2022} Karagiorgi, G., Kasieczka, G., Kravitz, S., Nachman, B. \& Shih, D. Machine learning in the search for new fundamental physics. Preprint at \url{https://arxiv.org/abs/2112.03769} (2021).
+
+\bibitem{Belis2024} Belis, V., Odagiu, P. \& Aarrestad, T. K. Machine learning for anomaly detection in particle physics. \textit{Rev. Phys.} \textbf{12}, 100091 (2024). \url{https://doi.org/10.1016/j.revip.2024.100091}.
+
+\bibitem{ATLAS2020} ATLAS Collaboration. Dijet resonance search with weak supervision using $\sqrt{s}=13$~TeV $pp$ collisions in the ATLAS detector. \textit{Phys. Rev. Lett.} \textbf{125}, 131801 (2020). \url{https://doi.org/10.1103/physrevlett.125.131801}.
+
+\bibitem{ATLAS2023} ATLAS Collaboration. Anomaly detection search for new resonances decaying into a Higgs boson and a generic new particle $X$ in hadronic final states using $\sqrt{s}=13$~TeV $pp$ collisions with the ATLAS detector. \textit{Phys. Rev. D} \textbf{108}, 052009 (2023). \url{https://doi.org/10.1103/physrevd.108.052009}.
+
+\bibitem{ATLAS2024} ATLAS Collaboration. Search for new phenomena in two-body invariant mass distributions using unsupervised machine learning for anomaly detection at $\sqrt{s}=13$~TeV with the ATLAS detector. \textit{Phys. Rev. Lett.} \textbf{132}, 081801 (2024). \url{https://doi.org/10.1103/PhysRevLett.132.081801}.
+
+\bibitem{ATLAS2025} ATLAS Collaboration. Weakly supervised anomaly detection for resonant new physics in the dijet final state using proton--proton collisions at $\sqrt{s}=13$~TeV with the ATLAS detector. \textit{Phys. Rev. D} \textbf{112}, 072009 (2025). \url{https://doi.org/10.1103/2yq5-vj59}.
+
+\bibitem{CMS2025} CMS Collaboration. Model-agnostic search for dijet resonances with anomalous jet substructure in proton--proton collisions at $\sqrt{s}=13$~TeV. \textit{Rep. Prog. Phys.} \textbf{88}, 067802 (2025). \url{https://doi.org/10.1088/1361-6633/add762}.
+
+\bibitem{Hajer2020} Hajer, J., Li, Y.-Y., Liu, T. \& Wang, H. Novelty detection meets collider physics. \textit{Phys. Rev. D} \textbf{101}, 076015 (2020). \url{https://doi.org/10.1103/physrevd.101.076015}.
+
+\bibitem{Heimel2019} Heimel, T., Kasieczka, G., Plehn, T. \& Thompson, J. M. QCD or what? \textit{SciPost Phys.} \textbf{6}, 030 (2019). \url{https://doi.org/10.21468/scipostphys.6.3.030}.
+
+\bibitem{Farina2020} Farina, M., Nakai, Y. \& Shih, D. Searching for new physics with deep autoencoders. \textit{Phys. Rev. D} \textbf{101}, 075021 (2020). \url{https://doi.org/10.1103/physrevd.101.075021}.
+
+\bibitem{Cerri2019} Cerri, O., Nguyen, T. Q., Pierini, M., Spiropulu, M. \& Vlimant, J.-R. Variational autoencoders for new physics mining at the Large Hadron Collider. \textit{J. High Energy Phys.} \textbf{05}, 036 (2019). \url{https://authors.library.caltech.edu/records/ez4g7-z0z56/latest}.
+
+\bibitem{Blance2019} Blance, A., Spannowsky, M. \& Waite, P. Adversarially-trained autoencoders for robust unsupervised new physics searches. \textit{J. High Energy Phys.} \textbf{10}, 047 (2019). \url{https://doi.org/10.1007/jhep10(2019)047}.
+
+\bibitem{Finke2021} Finke, T., Kr\"amer, M., Morandini, A., M\"uck, A. \& Oleksiyuk, I. Autoencoders for unsupervised anomaly detection in high energy physics. \textit{J. High Energy Phys.} \textbf{06}, 161 (2021). \url{https://doi.org/10.1007/jhep06(2021)161}.
+
+\bibitem{Nachman2020} Nachman, B. \& Shih, D. Anomaly detection with density estimation. \textit{Phys. Rev. D} \textbf{101}, 075042 (2020). \url{https://doi.org/10.1103/physrevd.101.075042}.
+
+\bibitem{Andreassen2020} Andreassen, A., Nachman, B. \& Shih, D. Simulation assisted likelihood-free anomaly detection. \textit{Phys. Rev. D} \textbf{101}, 095004 (2020). \url{https://arxiv.org/abs/2001.05001}.
+
+\bibitem{Hallin2022} Hallin, A. et al. Classifying anomalies through outer density estimation. \textit{Phys. Rev. D} \textbf{106}, 055006 (2022). \url{https://doi.org/10.1103/physrevd.106.055006}.
+
+\bibitem{Metodiev2017} Metodiev, E. M., Nachman, B. \& Thaler, J. Classification without labels: learning from mixed samples in high energy physics. \textit{J. High Energy Phys.} \textbf{10}, 174 (2017). \url{https://doi.org/10.1007/jhep10(2017)174}.
+
+\bibitem{Collins2018} Collins, J. H., Howe, K. \& Nachman, B. Anomaly detection for resonant new physics with machine learning. \textit{Phys. Rev. Lett.} \textbf{121}, 241803 (2018). \url{https://arxiv.org/abs/1805.02664}.
+
+\bibitem{Collins2019} Collins, J. H., Howe, K. \& Nachman, B. Extending the search for new resonances with machine learning. \textit{Phys. Rev. D} \textbf{99}, 014038 (2019). \url{https://doi.org/10.1103/physrevd.99.014038}.
+
+\bibitem{DAgnolo2019} D'Agnolo, R. T. \& Wulzer, A. Learning new physics from a machine. \textit{Phys. Rev. D} \textbf{99}, 015014 (2019). \url{https://doi.org/10.1103/physrevd.99.015014}.
+
+\bibitem{Finke2024} Finke, T. et al. Back to the roots: tree-based algorithms for weakly supervised anomaly detection. \textit{Phys. Rev. D} \textbf{109}, 034033 (2024). \url{https://doi.org/10.1103/physrevd.109.034033}.
+
+\bibitem{Cheng2025} Cheng, C. L., Singh, G. \& Nachman, B. Incorporating physical priors into weakly supervised anomaly detection. \textit{Phys. Rev. Lett.} (2025). \url{https://doi.org/10.1103/8259-wt5p}.
+
+\bibitem{Kasieczka2021} Kasieczka, G. et al. The LHC Olympics 2020: a community challenge for anomaly detection in high energy physics. \textit{Rep. Prog. Phys.} \textbf{84}, 124201 (2021). \url{https://doi.org/10.1088/1361-6633/ac36b9}.
+
+\bibitem{Aarrestad2022} Aarrestad, T. et al. The Dark Machines anomaly score challenge: benchmark data and model independent event classification for the Large Hadron Collider. \textit{SciPost Phys.} \textbf{12}, 043 (2022). \url{https://doi.org/10.21468/scipostphys.12.1.043}.
+
+\bibitem{Golling2024} Golling, T. et al. The interplay of machine learning-based resonant anomaly detection methods. \textit{Eur. Phys. J. C} \textbf{84}, 241 (2024). \url{https://pmc.ncbi.nlm.nih.gov/articles/PMC10923980/}.
+
+\bibitem{Ruff2018} Ruff, L. et al. Deep one-class classification. In \textit{Proc. 35th International Conference on Machine Learning} Vol.~80, 4393--4402 (PMLR, 2018). \url{https://doi.org/10.1080/00224065.2024.2421164}.
+
+\bibitem{Ruff2020} Ruff, L. et al. Deep semi-supervised anomaly detection. In \textit{International Conference on Learning Representations} (2020). \url{https://openreview.net/forum?id=HkgH0TEYwH}.
+
+\bibitem{Ruff2021} Ruff, L. et al. A unifying review of deep and shallow anomaly detection. \textit{Proc. IEEE} \textbf{109}, 756--795 (2021). \url{https://doi.org/10.1109/jproc.2021.3052449}.
+
+\bibitem{Liu2008} Liu, F. T., Ting, K. M. \& Zhou, Z.-H. Isolation forest. In \textit{Proc. 8th IEEE International Conference on Data Mining} 413--422 (IEEE, 2008). \url{https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf}.
+
+\bibitem{Kasieczka2020} Kasieczka, G. \& Shih, D. DisCo Fever: robust networks through distance correlation. \textit{Phys. Rev. Lett.} \textbf{125}, 122001 (2020). \url{https://arxiv.org/abs/2001.05310}.
+
+\bibitem{Louppe2017} Louppe, G., Kagan, M. \& Cranmer, K. Learning to pivot with adversarial networks. In \textit{Advances in Neural Information Processing Systems} Vol.~30 (2017). \url{https://arxiv.org/abs/1611.01046}.
+
+\bibitem{Shimmin2017} Shimmin, C. et al. Decorrelated jet substructure tagging using adversarial neural networks. \textit{Phys. Rev. D} \textbf{96}, 074034 (2017). \url{https://doi.org/10.1103/physrevd.96.074034}.
+
+\bibitem{Hallin2023} Hallin, A., Kasieczka, G., Quadfasel, T., Shih, D. \& Sommerhalder, M. Resonant anomaly detection without background sculpting. \textit{Phys. Rev. D} \textbf{107}, 114012 (2023). \url{https://doi.org/10.1103/physrevd.107.114012}.
+
+\bibitem{Ngairangbam2022} Ngairangbam, V. S., Spannowsky, M. \& Takeuchi, M. Anomaly detection in high-energy physics using a quantum autoencoder. \textit{Phys. Rev. D} \textbf{105}, 095004 (2022). \url{https://durham-repository.worktribe.com/OutputFile/1196902}.
+
+\bibitem{Alvi2023} Alvi, S., Bauer, C. W. \& Nachman, B. Quantum anomaly detection for collider physics. \textit{J. High Energy Phys.} \textbf{02}, 220 (2023). \url{https://doi.org/10.1007/jhep02(2023)220}.
+
+\bibitem{Kasieczka2019data} Kasieczka, G., Nachman, B. \& Shih, D. Official datasets for LHC Olympics 2020 anomaly detection challenge. \textit{Zenodo} \url{https://doi.org/10.5281/zenodo.6466204} (2019).
+
+\bibitem{Sjostrand2015} Sj\"ostrand, T. et al. An introduction to PYTHIA 8.2. \textit{Comput. Phys. Commun.} \textbf{191}, 159--177 (2015). \url{https://doi.org/10.1016/j.cpc.2015.01.024}.
+
+\bibitem{deFavereau2014} de Favereau, J. et al. DELPHES 3: a modular framework for fast simulation of a generic detector. \textit{J. High Energy Phys.} \textbf{02}, 057 (2014). \url{https://doi.org/10.1007/jhep02(2014)057}.
+
+\bibitem{Cacciari2008} Cacciari, M., Salam, G. P. \& Soyez, G. The anti-$k_t$ jet clustering algorithm. \textit{J. High Energy Phys.} \textbf{04}, 063 (2008). \url{https://arxiv.org/abs/0802.1189}.
+
+\bibitem{Cacciari2012} Cacciari, M., Salam, G. P. \& Soyez, G. FastJet user manual. \textit{Eur. Phys. J. C} \textbf{72}, 1896 (2012). \url{https://doi.org/10.1140/epjc/s10052-012-1896-2}.
+
+\bibitem{Thaler2011} Thaler, J. \& Van Tilburg, K. Identifying boosted objects with $N$-subjettiness. \textit{J. High Energy Phys.} \textbf{03}, 015 (2011). \url{https://arxiv.org/abs/1011.2268}.
+
+\bibitem{Pedregosa2011} Pedregosa, F. et al. Scikit-learn: machine learning in Python. \textit{J. Mach. Learn. Res.} \textbf{12}, 2825--2830 (2011). \url{https://jmlr.org/papers/v12/pedregosa11a.html}.
+
+\bibitem{Bonneel2015} Bonneel, N., Rabin, J., Peyr\'e, G. \& Pfister, H. Sliced and Radon Wasserstein barycenters of measures. \textit{J. Math. Imaging Vis.} \textbf{51}, 22--45 (2015). \url{https://vcg.seas.harvard.edu/content/3-publications/20140101-sliced-and-radon-wasserstein-barycenters-of-measures/2014_sliced.pdf}.
+
+\bibitem{Kolouri2019} Kolouri, S., Pope, P. E., Martin, C. E. \& Rohde, G. K. Sliced Wasserstein auto-encoders. In \textit{International Conference on Learning Representations} (2019). \url{https://openreview.net/forum?id=H1xaJn05FQ}.
+
+\bibitem{Szekely2007} Sz\'ekely, G. J., Rizzo, M. L. \& Bakirov, N. K. Measuring and testing dependence by correlation of distances. \textit{Ann. Stat.} \textbf{35}, 2769--2794 (2007). \url{https://arxiv.org/abs/0803.4101}.
+
+\bibitem{Paszke2019} Paszke, A. et al. PyTorch: an imperative style, high-performance deep learning library. In \textit{Advances in Neural Information Processing Systems} Vol.~32, 8024--8035 (2019). \url{https://arxiv.org/abs/1912.01703}.
+
+\bibitem{Kingma2015} Kingma, D. P. \& Ba, J. Adam: a method for stochastic optimization. In \textit{International Conference on Learning Representations} (2015). \url{https://arxiv.org/abs/1412.6980}.
+
+\bibitem{Papamakarios2021} Papamakarios, G. et al. Normalizing flows for probabilistic modeling and inference. \textit{J. Mach. Learn. Res.} \textbf{22}, 1--64 (2021). \url{https://jmlr.org/papers/v22/19-1028.html}.
+
+\bibitem{Sohn2015} Sohn, K., Lee, H. \& Yan, X. Learning structured output representation using deep conditional generative models. In \textit{Advances in Neural Information Processing Systems} Vol.~28 (2015). \url{https://papers.nips.cc/paper/2015/hash/8d55a249e6baa5c06772297520da2051-Abstract.html}.
+
+\bibitem{KingmaWelling2014} Kingma, D. P. \& Welling, M. Auto-encoding variational Bayes. In \textit{International Conference on Learning Representations} (2014). \url{https://arxiv.org/abs/1312.6114}.
+
+\bibitem{AdditionalSignals2026} Additional signal models for the LHCO 2020 R\&D dataset. Zenodo record 18983506 (2026). \url{https://doi.org/10.5281/zenodo.18983506}.
+
+\bibitem{ShaferVovk2008} Shafer, G. \& Vovk, V. A tutorial on conformal prediction. \textit{J. Mach. Learn. Res.} \textbf{9}, 371--421 (2008). \url{https://jmlr.org/papers/volume9/shafer08a/shafer08a.pdf}.
+
+\end{thebibliography}
+\endgroup
 
 % =========================================================
-\appendix
+%  SUPPLEMENTARY INFORMATION  (submit as a separate file)
+% =========================================================
+\clearpage
+\section*{Supplementary information}
 
-\section{Mass Sculpting Diagnostics — Isolation Forest}
-\label{app:if_diag}
-
-\Cref{fig:if_diag} shows the three-panel $\mjj$ diagnostic for
-Isolation Forest (M2, seed~43). Despite being the best-performing
-unsupervised detector in terms of AUC, IF shows a broad score--mass
-correlation ($\rho = 0.284$), producing a non-flat acceptance profile
-that preferentially retains high-mass events. This underlines the
-importance of monitoring JSD alongside AUC.
+\begingroup
+\captionsetup[figure]{name=Supplementary Fig.}
+\captionsetup[table]{name=Supplementary Table}
+\setcounter{figure}{0}\setcounter{table}{0}
+\renewcommand{\theHfigure}{S\arabic{figure}}
+\renewcommand{\theHtable}{S\arabic{table}}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\columnwidth]{figures/M2_IsolationForest_f0_k0_43_mass_diagnostics.png}
-  \caption{Mass sculpting diagnostics for Isolation Forest (seed~43).
-    The score--$\mjj$ correlation $\rho = 0.284$ is the largest
+  \figbox{figures/M2_IsolationForest_f0_k0_43_mass_diagnostics.png}
+  \caption{\textbf{Mass-sculpting diagnostics for Isolation Forest.} Seed~43.
+    The score--$\mjj$ correlation The measured score--mass correlation is the largest
     among all headline models, leading to a mass-dependent acceptance
     profile even at moderate ($10\%$) background efficiency.}
   \label{fig:if_diag}
 \end{figure}
 
-\section{Metric Definitions}
-\label{app:metrics}
-
 \begin{table}[h]
 \centering
-\caption{Summary of evaluation metrics.}
-\begin{tabular}{p{2.2cm} p{5.5cm}}
+\caption{\textbf{Summary of evaluation metrics.}}
+\label{tab:metrics}
+\begin{tabular}{P{2.6cm} P{10cm}}
 \toprule
 Metric & Definition \\
 \midrule
 AUC & $\int_0^1 \eS(\eB)\,d\eB$ \\[4pt]
 $\sic_\mathrm{max}$ & $\max_t \eS(t)/\sqrt{\eB(t)}$ \\[4pt]
 $1/\eB$ @ $\eS^*$ & $1/\mathrm{FPR}(t^*)$ where $\mathrm{TPR}(t^*)=\eS^*$ \\[4pt]
-JSD & $\frac12 D_\mathrm{KL}(P\|M) + \frac12 D_\mathrm{KL}(Q\|M)$, $M{=}\frac{P+Q}{2}$; $P,Q$ = inclusive/cut $\mjj$ hists. \\[4pt]
-$\rho_{s,\mjj}$ & Pearson corr.\ between scores and $\mjj$ on background test set \\[4pt]
-$\ftrain$ & Fraction of $N_\mathrm{bkg}$ injected as unlabeled signal \\[4pt]
-$\klabels$ & Number of positively labeled signal events (Deep SAD only) \\
+JSD & $\frac12 D_\mathrm{KL}(P\|M) + \frac12 D_\mathrm{KL}(Q\|M)$, $M{=}\frac{P+Q}{2}$; $P,Q$ = inclusive/cut $\mjj$ histograms \\[4pt]
+$\rho_{s,\mjj}$ & Pearson correlation between scores and $\mjj$ on the background test set \\[4pt]
+$\ftrain$ & Fraction of $N_\mathrm{bkg}$ injected as unlabelled signal \\[4pt]
+$\klabels$ & Number of positively labelled signal events (Deep SAD only) \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-% =========================================================
-\bibliographystyle{apsrev4-2}
-\bibliography{lhco2020}
+\endgroup
 
 \end{document}

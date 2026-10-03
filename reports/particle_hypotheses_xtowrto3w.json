@@ -1,0 +1,20 @@
+{
+  "protocol": "frozen background-only Deep Sets model and validation-background threshold",
+  "checkpoint": "C:\\Users\\astik\\OneDrive\\Desktop\\Unsupervised and Semi-Supervised Anomaly Detection on the LHC Olympics 2020 R&D Dataset\\output\\particle_deepsets_final\\particle_deepsets.pt",
+  "split_source": "existing_shared_split_files",
+  "test_background_events_available": 199984,
+  "test_background_events": 20000,
+  "test_background_false_positive_fraction": 0.0107,
+  "threshold": 0.0002441368851577863,
+  "threshold_tie_acceptance_probability": 0.8400000000017371,
+  "signal_hypotheses": {
+    "xtowrto3w": {
+      "status": "evaluated",
+      "source": "C:\\Users\\astik\\OneDrive\\Desktop\\Unsupervised and Semi-Supervised Anomaly Detection on the LHC Olympics 2020 R&D Dataset\\data\\external_signals\\xtowrto3w\\events.h5",
+      "events_scored": 32801,
+      "events_available": 32801,
+      "signal_efficiency_at_threshold": 0.0028047925368129023,
+      "roc_auc_vs_test_background": 0.5068459856406816
+    }
+  }
+}

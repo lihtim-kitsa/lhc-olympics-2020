@@ -1,0 +1,30 @@
+{
+  "release": "v1.0",
+  "date": "2026-10-03",
+  "files": {
+    "reports/final/LHC_Olympics_Project_Report.pdf": {
+      "bytes": 266324,
+      "sha256": "d901c6a8abb37d02b41c8c861c740aa5c3e4734789c9ddc9a15924249781bff2"
+    },
+    "reports/final/lhco2020_paper.pdf": {
+      "bytes": 899815,
+      "sha256": "5f3444005aca33cfa832e128c4eef479c40be17b6df3947643c5bf1ebe8050f8"
+    },
+    "reports/tables/results.csv": {
+      "bytes": 44131,
+      "sha256": "c8a67a62092a7102923411aa780ea3e5c36c679f6f74263e542292d799bf24e0"
+    },
+    "reports/tables/auc_bootstrap.json": {
+      "bytes": 4056,
+      "sha256": "99a0849c09c6556e0332cd11e500e1b5b212ab17124d782beb225b5106c2f797"
+    },
+    "reports/tables/frozen_test_scores.npz": {
+      "bytes": 6421726,
+      "sha256": "ff8267a400197b7747374c573b7b2112b6184441077732f9f98e02e60821b231"
+    },
+    "requirements-release-py311.txt": {
+      "bytes": 2518,
+      "sha256": "516dcdd3bf5f63a1bbef3bc6ff49e1f0e712ca3a86248dd7cd790e9f4fafcbad"
+    }
+  }
+}

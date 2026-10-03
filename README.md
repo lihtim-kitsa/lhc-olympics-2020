@@ -13,9 +13,24 @@ This repository contains a reproducible, simulation-only benchmark on the public
 
 The main detector inputs are `mJ1`, `dmJ`, `tau21_J1`, `tau21_J2`, and `dRJJ`. The resonant observable `mJJ` is excluded from M1-M5 and included only in M6. The full experimental protocol and its limitations are in [PRD_final.md](PRD_final.md); implementation details and measured results are in [reports/technical_note.md](reports/technical_note.md).
 
+## Release results
+
+The final core results come from 47 fresh-checkout fits in an isolated Python 3.11 CPU environment. Six headline configurations have five seeds (42–46); the full contamination/label grid uses seed 42. Mean ± seed standard deviation:
+
+| Model | 2-prong AUC | Held-out 3-prong AUC |
+|---|---:|---:|
+| M1_Autoencoder | 0.7175 ± 0.0741 | 0.5965 ± 0.1026 |
+| M2_IsolationForest | 0.8068 ± 0.0077 | 0.6831 ± 0.0206 |
+| M3_DeepSVDD | 0.5002 ± 0.0072 | 0.6170 ± 0.0114 |
+| M4_DeepSAD | 0.8880 ± 0.0114 | 0.7492 ± 0.0614 |
+| M5_Supervised | 0.9659 ± 0.0002 | 0.9292 ± 0.0012 |
+| M6_MassAware | 0.5151 ± 0.0105 | 0.6670 ± 0.0233 |
+
+Final PDFs: [project report](reports/final/LHC_Olympics_Project_Report.pdf) and [manuscript](reports/final/lhco2020_paper.pdf). Paired finite-test AUC intervals are in `reports/tables/auc_bootstrap.json`; historical results and clean-run evidence are retained under `reports/reproduction/`.
+
 ## Reproduce
 
-Use Python 3.11 or 3.13 and install the project dependencies (the full reproduction run was executed with Python 3.13; the Dockerfile uses Python 3.11):
+Use Python 3.11 or 3.13 and install the project dependencies (the final core reproduction used Python 3.11; the Dockerfile uses Python 3.11):
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -23,6 +38,8 @@ python scripts/reproduce.py
 ```
 
 The reproduction command verifies the four official Zenodo files, builds the feature tables, creates deterministic 60/20/20 event splits, runs the contamination and Deep SAD label-budget grids, evaluates held-out 3-prong events, and writes results and diagnostics under `reports/`. The official files total about 3.2 GB. To build the canonical compact feature tables without reclustering every event, it uses the authors' supplied high-level features and validates a deterministic raw-event sample with FastJet. `python scripts/build_features.py --from-raw` instead reclusters every event using the documented exclusive-kT subjettiness axes; that tau definition differs from the released FastJet-contrib values and is not the canonical benchmark input.
+
+A pinned Windows/Python 3.11 reference stack is supplied in `requirements-release-py311.txt`. After the full run, generate AUC intervals and reports with `python scripts/bootstrap_auc.py`, `python scripts/update_paper_results.py` and `python scripts/build_report.py`.
 
 For a containerized run, build and run the included Docker image. Raw data are downloaded at runtime and are not included in the image.
 
@@ -32,7 +49,7 @@ or `python scripts/reproduce_fast.py`. This seeded Isolation Forest demo samples
 on validation background. It writes metrics, versions, runtime and scores under
 `output/reproduce_fast/`; its results are separate from the full benchmark.
 Run `python -m pytest tests/ -q -p no:cacheprovider` for protocol checks.
-Release acceptance and outstanding requirements are recorded in
+Release acceptance, measured runtime and declared protocol deviations are recorded in
 [reports/release_status.md](reports/release_status.md).
 
 ## Outputs

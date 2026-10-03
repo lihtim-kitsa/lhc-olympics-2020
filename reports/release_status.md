@@ -1,37 +1,56 @@
-# Release acceptance status
+# v1.0 release acceptance — 3 October 2026
 
-Checked 2026-10-03. Release-tooling checkpoint: `0b441f9`.
+The benchmark release is complete within the declared simulation-only scope. This is author verification, not an external scientific review or a discovery claim.
 
 ## Verified
 
-- 25 tests pass in the working checkout and a fresh local Git clone. Coverage includes analytic jet-feature cases, deterministic/disjoint splits, training-only scaling, disjoint Deep SAD signal labels, metrics and validation-calibrated cuts including score ties.
-- A loader bug was fixed: `load_data` now uses its supplied canonical feature-file path. Default benchmark paths are unchanged.
-- `make reproduce-fast` / `python scripts/reproduce_fast.py` runs a seeded cached-feature Isolation Forest demo independently of canonical results.
-- Demo seed 42: 2,000 events per split, AUC 0.81020475, validation background acceptance 0.1000, test background acceptance 0.0945 and test signal acceptance 0.3820. Fresh-clone metrics match; model fitting and scoring took approximately 0.5 seconds, excluding interpreter/import startup.
-- Offline wheel build and isolated package installation pass in both checkouts. Package discovery explicitly includes `src` and its subpackages.
-- Changed/new standalone Python files pass Flake8 (E501/W503 excluded to match existing wrapping); changed Python files parse successfully.
-- Saved background/2-prong splits contain 1,099,893 events without overlap. Cached feature HDF5 files total 58,465,336 bytes; raw files total 3,223,240,722 bytes.
+- All 47 frozen core configurations trained and evaluated from scratch in a fresh checkout: the complete seed-42 grid plus six headline configurations repeated over seeds 43–46.
+- Isolated Python 3.11.9 dependency installation; raw HDF5 Blosc compression explicitly registered through hdf5plugin. Pinned Windows verification environment: `requirements-release-py311.txt`.
+- Four official raw files checksum-verified and shared read-only; features and splits rebuilt. No previous core model checkpoint was reused. The raw downloads themselves were not repeated.
+- Full reproduction entrypoint completed after staged training, retaining all 47 verified fits and regenerating summaries. Three serial fits and 44 fits across three independent worker stores are recorded separately.
+- 30 tests pass, covering analytic feature cases, extended schema, split disjointness, scaler isolation, label isolation, metrics, tied thresholds, experiment scheduling/resume and paired AUC uncertainty. Release-tooling lint, wheel build and diff checks pass.
+- 500 stratified paired-bootstrap trials on frozen seed-42 test scores; 199,984 background and 19,996 signal events. AUC intervals and all pairwise differences are separate from training-seed variance. Saved scores include matching event IDs.
+- Manuscript tables and figures generated from the final table; PDF compilation resolves citations. Reference identity audit and visual PDF checks completed.
+- Public repository verified: https://github.com/lihtim-kitsa/lhc-olympics-2020 . Final source, results and PDFs committed for the annotated `v1.0` tag.
 
-## Verification environment and boundaries
+## Results
 
-Windows, Python 3.13.9; NumPy 2.3.5, h5py 3.15.1 and scikit-learn 1.7.2. Tests use the existing installed dependency environment. Fresh-clone package installation used `--no-deps --no-build-isolation`, so it does not prove dependency resolution on a new machine. The clone was local, with committed cached features; no new raw download or full-grid retraining was performed. Demo outputs are ignored under `output/reproduce_fast/`.
+Five-seed mean ± sample standard deviation; the three-prong signal is held out during training.
 
-For this Windows sandbox, temporary pytest files were placed inside the workspace using a new `--basetemp` directory; the default sandbox temporary location was inaccessible. Do not reuse a basetemp path containing files you want to retain, because pytest clears it.
+| Model | 2-prong AUC | Held-out 3-prong AUC |
+|---|---:|---:|
+| M1_Autoencoder | 0.7175 ± 0.0741 | 0.5965 ± 0.1026 |
+| M2_IsolationForest | 0.8068 ± 0.0077 | 0.6831 ± 0.0206 |
+| M3_DeepSVDD | 0.5002 ± 0.0072 | 0.6170 ± 0.0114 |
+| M4_DeepSAD | 0.8880 ± 0.0114 | 0.7492 ± 0.0614 |
+| M5_Supervised | 0.9659 ± 0.0002 | 0.9292 ± 0.0012 |
+| M6_MassAware | 0.5151 ± 0.0105 | 0.6670 ± 0.0233 |
 
-## Outstanding final-release requirements
+The final core table uses the clean Python 3.11 CPU run consistently. Historical measurements are preserved in `reports/reproduction/historical_results.csv`; they differ for some neural configurations. `reports/reproduction/verification.json` quantifies the differences. Five exploratory baselines retain their separately evaluated single-seed results and are not represented as repeated core experiments.
 
-1. Five-seed experiments: the saved table has 40 unique rows, including 35 M1–M6 rows. Each M1–M6 method currently has seeds 42–44; the full contamination/label-budget grid is only seed 42. The existing full reproduction command schedules seeds 42–46 and retains completed checkpoint/result pairs. Its aggregate currently selects only seeds 42–44, which must be corrected and the report updated when new runs finish.
-2. Full reproduction from a fresh environment, including dependency installation, raw-file verification, every required experiment and measured end-to-end runtime/disk footprint. The successful fast demo is narrower evidence.
-3. Review and validate the existing uncommitted LaTeX manuscript and bibliography changes, and reconcile report claims with the final result table. Preserve extended-study documentation when regenerating the report: the current report builder rewrites `technical_note.md` from the core table.
-4. Confirm public GitHub accessibility. The configured remote is `https://github.com/lihtim-kitsa/lhc-olympics-2020`; the web check did not establish visibility.
-5. Commit validated final report artifacts and create `v1.0` only after the above checks succeed. No release tag was created at this checkpoint.
+## Runtime and disk footprint
 
-## Commands
+The staged data-verification, feature/split rebuilding, full training/evaluation and resume check took 33.3 minutes of wall time, including staging pauses; raw downloading was excluded. The three-worker stage trained/evaluated 44 configurations in 24.8 minutes, following three initial serial fits. The final resume entrypoint took 15.8 seconds. Raw inputs occupy 3.223 GB; regenerated feature caches 61.6 MB; core model artifacts 10.5 MB; diagnostic figures 11.5 MB. Temporary environments and duplicate worker stores require additional space. Peak RAM was not measured.
+
+## Declared protocol deviations and limits
+
+- Canonical inputs use released high-level tau values. Raw clustering is cross-checked on 128 events; its exclusive-kT tau convention differs from the supplied FastJet-contrib convention. This is not exact full raw feature reproduction.
+- Every stochastic core method has five headline seeds; contamination/label sweeps and exploratory extensions primarily use seed 42.
+- Finite-test intervals cover seed-42 AUC only, not every reported metric. The 50-trial null ensemble is limited; separate 500-trial closure studies do not establish global significance or detector-systematic closure.
+- Three-prong generalisation uses frozen two-prong-trained scores. A matched three-prong training study, full systematic model and external independent review remain future research.
+- No retrospective claim is made that an evaluation-free release-candidate tag existed before the earlier exploratory tests. The historical evaluation sequence is preserved.
+- The pinned environment is Windows/Python 3.11 specific. Docker build and Linux reproduction were not independently run. No claim of exact neural-score identity across platforms, dependency versions or CPU reduction schedules.
+
+## Verify
 
 ```text
+python -m pip install -e ".[dev]"
 python -m pytest tests/ -q -p no:cacheprovider
 python scripts/reproduce_fast.py
 python scripts/reproduce.py
+python scripts/bootstrap_auc.py
+python scripts/update_paper_results.py
+python scripts/build_report.py
 ```
 
-The first two are quick verification. The last runs the full experiment matrix and requires the complete dependency/data environment.
+For the pinned reference stack, install `requirements-release-py311.txt` in a Python 3.11 Windows environment before installing the editable project. Full reproduction requires approximately 3.2 GB of raw input plus output/environment storage. Release PDFs are under `reports/final/`.

@@ -1,0 +1,67 @@
+{
+  "scope": "all 47 frozen core runs trained from scratch in a clean checkout",
+  "parallel_workers": 3,
+  "torch_threads_per_worker": 1,
+  "initial_serial_runs": 3,
+  "parallel_runs": 44,
+  "parallel_stage_seconds": 1485.839117100004,
+  "source_commit": "0c6d40a (formatting does not alter the frozen training/evaluation protocol)",
+  "note": "Staged author reproduction: raw files checksum-verified and shared read-only; fresh features, splits and every core detector. Three initial serial runs plus 44 in three isolated worker stores. Resume entrypoint rerun after merge. No independent external review.",
+  "environment": {
+    "python": "3.11.9",
+    "numpy": "2.3.5",
+    "pandas": "2.3.3",
+    "platform": "Windows-10-10.0.26300-SP0"
+  },
+  "auc_comparison_to_release": {
+    "M1_Autoencoder": {
+      "runs": 8,
+      "max_absolute_auc_difference": 0.2107943344159271,
+      "max_absolute_3prong_auc_difference": 0.2722821698954221
+    },
+    "M2_IsolationForest": {
+      "runs": 8,
+      "max_absolute_auc_difference": 0.0,
+      "max_absolute_3prong_auc_difference": 0.0
+    },
+    "M3_DeepSVDD": {
+      "runs": 8,
+      "max_absolute_auc_difference": 0.02927254734489576,
+      "max_absolute_3prong_auc_difference": 0.01419284585527536
+    },
+    "M4_DeepSAD": {
+      "runs": 13,
+      "max_absolute_auc_difference": 0.17131067674851863,
+      "max_absolute_3prong_auc_difference": 0.21423812387111507
+    },
+    "M5_Supervised": {
+      "runs": 5,
+      "max_absolute_auc_difference": 0.0,
+      "max_absolute_3prong_auc_difference": 0.0
+    },
+    "M6_MassAware": {
+      "runs": 5,
+      "max_absolute_auc_difference": 0.02890255662841501,
+      "max_absolute_3prong_auc_difference": 0.028712689863401142
+    }
+  },
+  "disk_bytes": {
+    "raw_files": 3223240722,
+    "clean_processed_features": 61587425,
+    "clean_models": 10505146,
+    "clean_figures": 11513024
+  },
+  "entrypoint_resume": {
+    "elapsed_seconds": 15.816487600000983,
+    "configured_runs": 47,
+    "retained_runs": 47,
+    "completed_runs": 0
+  },
+  "staged_end_to_end_seconds": 1999.5721819400787,
+  "checks": {
+    "tests_passed": 30,
+    "wheel_build": "passed",
+    "tooling_lint": "passed",
+    "configured_core_runs": 47
+  }
+}
