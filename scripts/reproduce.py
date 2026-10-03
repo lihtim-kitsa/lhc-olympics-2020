@@ -1,10 +1,11 @@
-"""Run the preregistered single-seed LHCO experiment grid end-to-end."""
+"""Run the seed-42 grid and five-seed core headline comparisons."""
 import copy
 import hashlib
 import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import yaml
@@ -16,6 +17,7 @@ from scripts.evaluate import evaluate_model
 
 
 def run_grid():
+    started = time.perf_counter()
     verified=False
     manifest_path='data/manifest.yaml'
     if os.path.exists(manifest_path):
@@ -38,13 +40,14 @@ def run_grid():
     subprocess.run([sys.executable,'scripts/build_extended_features.py'],check=True)
     subprocess.run([sys.executable,'src/data/make_dataset.py'],check=True)
     grid=[]
-    for seed in [42, 43, 44, 45, 46]:
+    for seed in [42]:
         for model_id in ('m1_autoencoder','m2_isolation_forest','m3_deep_svdd'):
             with open(f'configs/{model_id}.yaml',encoding='utf-8') as f: base=yaml.safe_load(f)
             for f_train in (0.0,0.1,0.5,1.0):
                 cfg=copy.deepcopy(base)
                 cfg['data']['f_train']=f_train; cfg['data']['k_labels']=0; cfg['training']['seed']=seed
                 grid.append(cfg)
+
         with open('configs/m4_deep_sad.yaml',encoding='utf-8') as f: sad_base=yaml.safe_load(f)
         for f_train in (0.0,0.5,1.0):
             for k in (10,100,1000):
@@ -56,6 +59,14 @@ def run_grid():
                 cfg=yaml.safe_load(f)
                 cfg['training']['seed']=seed
                 grid.append(cfg)
+
+    for seed in (43,44,45,46):
+        for model_id in ('m1_autoencoder','m2_isolation_forest','m3_deep_svdd',
+                         'm4_deep_sad','m5_supervised','m6_mass_aware'):
+            with open(f'configs/{model_id}.yaml',encoding='utf-8') as f:
+                cfg=yaml.safe_load(f)
+            cfg['training']['seed']=seed
+            grid.append(cfg)
 
     manifest=[]
     for i,cfg in enumerate(grid,1):
@@ -73,6 +84,9 @@ def run_grid():
                 if len(found):
                     entry['status']='already completed; retained'
                     manifest.append(entry)
+                    os.makedirs('reports/tables',exist_ok=True)
+                    with open('reports/tables/run_manifest.json','w',encoding='utf-8') as f:
+                        json.dump(manifest,f,indent=2)
                     continue
         train_model(cfg)
         evaluate_model(cfg)
@@ -82,11 +96,16 @@ def run_grid():
         with open('reports/tables/run_manifest.json','w',encoding='utf-8') as f: json.dump(manifest,f,indent=2)
 
     results=pd.read_csv('reports/tables/results.csv')
-    baseline=results[results.seed.isin([42,43,44]) & results.model.isin([
+    baseline=results[results.seed.isin([42,43,44,45,46]) & results.model.isin([
         'M1_Autoencoder','M2_IsolationForest','M3_DeepSVDD','M4_DeepSAD','M5_Supervised','M6_MassAware'])]
     numeric=[c for c in ('roc_auc','roc_auc_3prong','rej_10','rej_10_3prong','mass_sculpting_jsd_at_10pct_bkg') if c in baseline]
     summary=baseline.groupby(['model','f_train','k_labels'])[numeric].agg(['mean','std','count'])
     summary.to_csv('reports/tables/replicate_summary.csv')
+    with open('reports/tables/reproduction_timing.json','w',encoding='utf-8') as f:
+        json.dump({'elapsed_seconds':time.perf_counter()-started,
+                   'configured_runs':len(grid),
+                   'retained_runs':sum(item['status'].startswith('already') for item in manifest),
+                   'completed_runs':sum(item['status']=='completed' for item in manifest)},f,indent=2)
     print(f"Completed {len(manifest)} configured and replicate runs.")
 
 

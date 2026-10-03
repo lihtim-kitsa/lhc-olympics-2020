@@ -15,3 +15,10 @@ Close the release-tooling gaps without changing the frozen physics protocol or e
 - A fresh Git checkout can install the project and run the tests and demo using the local dependency environment; distinguish this from a new-environment full-grid reproduction.
 - Check five-seed coverage and public-repository status before tagging v1.0. Never label an incomplete benchmark as a final release.
 - Preserve existing manuscript edits and generated results; commit release tooling separately.
+
+## Final closeout (2026-10-03)
+- Complete five-seed M1–M6 headline comparisons while retaining the seed-42 contamination/label sweep, without changing training or evaluation choices.
+- Correct summary seed coverage, resume metadata and percentage labels; retain extended technical-note content.
+- Validate manuscript tables/figures against saved results, compile and visually inspect the PDF.
+- Verify in an isolated dependency environment; record environment, wall time, disk use and limitations.
+- Commit the final source/results, confirm the public remote, and tag/publish v1.0 only when acceptance passes.
