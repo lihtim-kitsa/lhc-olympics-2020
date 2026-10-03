@@ -30,6 +30,8 @@ Final PDFs: [project report](reports/final/LHC_Olympics_Project_Report.pdf) and 
 
 The subsequent [APS/PRA-format research paper](reports/final/lhco2020_pra.pdf) has an [editable REVTeX source](reports/lhco2020_pra.tex), [numerical audit](reports/pra_data_audit.json), and [novelty/journal-readiness assessment](reports/novelty_and_journal_assessment.md). The format does not imply PRA scope suitability; the assessment documents incremental novelty and outstanding scientific-validation requirements.
 
+The editable source now expands the original draft with the full detector catalog, diagnostics, and candidate-method appendices. Its updated editor preview is unverified because the native compiler is unavailable; the linked nine-page PDF is the preceding version. See the [revision and verification record](reports/pra_manuscript_verification.md).
+
 ## Reproduce
 
 Use Python 3.11 or 3.13 and install the project dependencies (the final core reproduction used Python 3.11; the Dockerfile uses Python 3.11):

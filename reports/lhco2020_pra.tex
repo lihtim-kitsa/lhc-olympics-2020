@@ -7,24 +7,28 @@
 \newcommand{\mjj}{m_{JJ}}
 \newcommand{\AUC}{\mathrm{AUC}}
 \begin{document}
-\title{Limited supervision, contamination, and topology transfer in collider anomaly detection: A reproducible LHC Olympics benchmark}
+\title{Benchmarking unsupervised and semi-supervised anomaly detection on the LHC Olympics 2020 R\&D dataset}
 \author{Mithil Hardik Astik}
 \email{f20240923@hyderabad.bits-pilani.ac.in}
 \affiliation{Department of Physics, BITS Pilani, Hyderabad Campus, Hyderabad, Telangana, India}
 \date{October 3, 2026}
 \begin{abstract}
-We study unsupervised and semi-supervised anomaly detection on the simulated LHC Olympics 2020 research and development dataset. A shared event split and five standardized jet observables support a controlled comparison of autoencoders, Isolation Forest, Deep SVDD, and a Deep SAD implementation, with fully supervised and mass-aware references. The released core comprises 23 configurations at one training seed and six reference configurations repeated at four additional seeds, for 47 independent fits. At the reference settings, the mean nominal-signal area under the receiver operating characteristic curve is $0.8068\pm0.0077$ for Isolation Forest and $0.8880\pm0.0114$ for Deep SAD with 100 known anomalies and 0.5\% injected training contamination; uncertainties here describe training-seed dispersion. Paired event bootstrapping separately quantifies finite-test uncertainty. Transfer to a three-prong signal reduces the mean Deep SAD area to $0.7492\pm0.0614$, while the fully supervised reference reaches $0.9292\pm0.0012$. Mass-distribution diagnostics and an explicitly approximate sideband-fit study expose the distinction between discrimination and trustworthy discovery inference. Archived particle-level and density-calibration extensions provide exploratory checks rather than equivalent reproductions of published state-of-the-art methods. The contribution is an auditable empirical benchmark and its limitations, rather than a new learning objective or a calibrated discovery claim.
+Model-agnostic searches for new physics at the Large Hadron Collider seek departures from the dominant quantum chromodynamics background without fixing a single signal hypothesis. We benchmark unsupervised, semi-supervised, and supervised detectors on the simulated LHC Olympics 2020 research and development dataset, examining label efficiency, training contamination, mass sculpting, and topology transfer. A shared event split and five standardized jet observables support 47 core fits, including five-seed comparisons of six headline configurations. Isolation Forest reaches nominal area under the receiver operating characteristic curve $0.8068\pm0.0077$; Deep SAD with 100 known anomalies and 0.5\% unlabelled training contamination reaches $0.8880\pm0.0114$. These uncertainties describe training-seed dispersion, while paired bootstrapping separately quantifies finite-test uncertainty. Deep SAD retains area $0.7492\pm0.0614$ on a held-out three-prong topology, compared with $0.9292\pm0.0012$ for the fully supervised reference. Background mass diagnostics reveal that strong ranking and stable search-variable distributions are distinct requirements. An approximate sideband-fit study, archived particle and density extensions, and an unevaluated mass-decorrelated candidate identify the remaining validation questions. The results provide a reproducible classical benchmark with explicit implementation and statistical limitations, rather than a calibrated discovery claim.
 \end{abstract}
 \maketitle
 
 \section{Introduction}
 Searches for new particles often specify a signal model before defining discriminating observables. Anomaly detection instead attempts to identify departures from a reference distribution, potentially retaining sensitivity to signals outside a narrowly chosen training hypothesis. The LHC Olympics challenge established a public setting for assessing such approaches and demonstrated the variety of available supervision strategies \cite{lhco}. This motivation does not remove the need for an explicit reference distribution, an evaluation protocol, or a statistical model for a claimed excess.
 
+The motivation is also experimental: ATLAS has performed a weakly supervised dijet-resonance search, and CMS has used complementary unsupervised, weakly supervised, and semi-supervised anomaly selections in collision data \cite{atlas,cms}. These searches establish the relevance of the problem, while emphasizing the distinction between a simulation benchmark and an analysis with detector uncertainties and background controls. Here ``model-agnostic'' refers to reduced dependence on a prescribed signal template; the choice of observables, reference events, score, and resonance window still supplies physical assumptions.
+
 Reconstruction errors, isolation-based scores, and compact learned representations encode different assumptions about unusual events. Deep SVDD learns a representation concentrated about a fixed center \cite{svdd}; Deep SAD extends that principle using known anomalous examples \cite{sad}. Collider applications also include weakly supervised signal-region classifiers \cite{cwola}, conditional density ratios \cite{anode}, and classification against generated reference events \cite{cathode}. Consequently, neither limited supervision nor a combination of anomaly ranking and a resonance search is intrinsically a new method.
 
-This work asks three narrower empirical questions. First, how do a small number of known anomalous events and unlabelled signal contamination affect ranking within one fixed feature representation? Second, how much of that ranking transfers to a different decay topology? Third, do improved rankings coincide with acceptable changes to the background mass distribution? We report the evidence available in the released implementation, including negative outcomes, and distinguish training variability from uncertainty in the finite evaluation sample.
+This study focuses on four practical questions. How robust are unsupervised detectors to unlabelled signal contamination? How much discrimination can a small labelled-anomaly budget provide? What distortion of the dijet-mass spectrum accompanies the score selection? And how much of the ranking transfers to a structurally different signal topology? We address these questions within one fixed feature representation, reporting negative outcomes as well as successful rankings and distinguishing training variability from uncertainty in the finite evaluation sample.
 
 The principal contribution is the common protocol, released checkpoints and scores, and an implementation audit that makes the comparison reproducible. It is not a claim of state-of-the-art performance: the published density-estimation methods are not reproduced faithfully by the exploratory proxies, and a physics-motivated subjettiness cut remains an important reference. All numerical conclusions below refer to simulated samples and the stated observables, rather than detector data or an unrestricted family of possible signals.
+
+The detector catalog retains the original study's M0--M12 organization, but separates repeatedly evaluated core models, archived single-seed comparisons, and the mass-decorrelated candidates whose performance remains unvalidated. This distinction allows the broader research program to be described without presenting every implemented idea as an established result. The central methodological lesson is to report discrimination jointly with label cost, robustness to contamination, topology dependence, and mass-spectrum stability.
 
 \section{Dataset and experimental protocol}
 \subsection{Samples, observables, and units}
@@ -35,6 +39,18 @@ We use the supplied high-level jet observables rather than claim an independent 
  x=(m_{J_1},|m_{J_1}-m_{J_2}|,\tau_{21}^{J_1},\tau_{21}^{J_2},\Delta R_{JJ}),
 \end{equation}
 where $\tau_{21}=\tau_2/\tau_1$ is a subjettiness ratio \cite{tau}. The dijet invariant mass $\mjj$ is retained for diagnostics and the sideband study; it is also supplied to the mass-aware reference as a sixth feature. We use the high-energy convention $c=1$: masses and momenta are quoted in GeV or TeV, while angular distances and subjettiness ratios are dimensionless. Standardized network inputs and anomaly scores are dimensionless.
+
+\begin{table}[tbp]
+\caption{Canonical five-feature representation before standardization. $J_1$ and $J_2$ denote the leading and subleading jets. The absolute mass difference has units of mass; it is not a normalized asymmetry.}\label{tab:features}
+\begin{ruledtabular}\begin{tabular}{cll}
+Index & Observable & Units\\
+0 & $m_{J_1}$ & GeV\\
+1 & $|m_{J_1}-m_{J_2}|$ & GeV\\
+2 & $\tau_{21}^{J_1}$ & Dimensionless\\
+3 & $\tau_{21}^{J_2}$ & Dimensionless\\
+4 & $\Delta R_{JJ}$ & Dimensionless
+\end{tabular}\end{ruledtabular}
+\end{table}
 
 Removing nonfinite or invalid high-level rows excludes 107 events from the combined nominal sample and 25 from the three-prong sample. The retained counts are shown in Table~\ref{tab:split}. The three-prong events are reserved for evaluation throughout the core comparison. This topology-transfer test shares simulation assumptions and resonance masses with the nominal hypothesis; it is not a generator-systematics or mass-extrapolation test.
 
@@ -128,6 +144,31 @@ We set $Z=0$ for $n\leq B$ and use the zero-uncertainty limit $Z^2=2[n\ln(n/B)-(
 For these diagnostics, 999 nominal signal events are added to the 199,984 test background events, corresponding to 0.4995\% relative to background or 0.4971\% of the mixture. The same sampled signal subset is used before and after a cut for a given run. Crucially, nominal fits can contain fractional tie-acceptance weights, for which an ordinary Poisson count model is not exact. The nuisance approximation does not jointly profile the sideband likelihood, selection-threshold uncertainty, or background-model misspecification. Reported $Z$ values therefore describe this diagnostic implementation and must not be interpreted as calibrated discovery significances.
 
 \section{Results}
+\subsection{Benchmark overview}
+The main comparison concerns M1--M6, which share the core event partitions and nominal high-level representation apart from M6's explicit mass input. Table~\ref{tab:models} places those configurations in the larger detector catalog. Supervision is defined by the information actually supplied during optimization: Deep SAD uses identified anomalous events, whereas the region classifiers use signal-region/sideband membership. These are distinct resources and should not be counted as interchangeable labels.
+
+\begin{table*}[tbp]
+\caption{Detector catalog retained from the original draft. ``Core'' means inclusion in the fresh 47-fit schedule and five-seed coverage at the stated headline setting. ``Archived'' means an exploratory seed-42 comparison. ``Candidate'' means an implemented research idea without a validated performance table in the current release.}\label{tab:models}
+\begin{ruledtabular}\begin{tabular}{clll}
+ID & Detector & Supervision or score construction & Evidence status\\
+M0 & Subjettiness cut & Physics-motivated scalar ranking & Archived\\
+M1 & Autoencoder & Unlabelled reconstruction error & Core\\
+M2 & Isolation Forest & Unlabelled isolation score & Core\\
+M3 & Deep SVDD & Unlabelled distance to fixed center & Core\\
+M4 & Deep SAD & Known anomalies plus unlabelled pool & Core\\
+M5 & Supervised MLP & All nominal training signal labels & Core reference\\
+M6 & Mass-aware SVDD & Unlabelled embedding with $\mjj$ input & Core reference\\
+M7 & Region MLP (CWoLa-inspired) & Signal-region/sideband classification & Archived\\
+M8 & Sideband GMM (ANODE-inspired) & Negative log background density & Archived proxy\\
+M9 & MD-SWAD & Distribution matching plus mass penalty & Candidate\\
+M10 & MD-SWAD-SAD & M9 plus anomalous-label repulsion & Candidate\\
+M11 & Conditional CVAE reference & Real versus generated region events & Archived proxy\\
+M12 & Region trees (CWoLa-inspired) & Signal-region/sideband classification & Archived
+\end{tabular}\end{ruledtabular}
+\end{table*}
+
+Architectural sharing is limited to the hypersphere models: the autoencoder and classifier have biases and different losses. Accordingly, the comparison tests concrete detector implementations and information budgets, not a claim that all thirteen models have an identical bias-free backbone. The role of $\mjj$ also differs: it is a direct input for M6, region-defining information for M7/M12, conditioning or reference information for the density proxies, and a training-penalty variable for the MD-SWAD candidate.
+
 \subsection{Headline comparison}
 Table~\ref{tab:headline} summarizes the six repeated configurations. Isolation Forest is the strongest learned unsupervised core detector for the nominal topology. Deep SAD with 100 known anomalies improves its mean AUC by 0.0812, while retaining a smaller mean mass-histogram divergence at the 10\% background cut. The fully supervised reference gives the highest AUC but consumes all nominal training signal labels and uses different train-only normalization and validation information. Its advantage is evidence for the value of this richer reference setup, not an isolated measurement of a label-budget effect.
 
@@ -195,6 +236,13 @@ $f$ (\%) & $k=10$ & $k=100$ & $k=1000$\\
 
 In Table~\ref{tab:sadgrid}, the 1,000-label settings give AUCs near 0.93, while the 10-label settings vary substantially. The 100-label reference is a useful intermediate operating point, rather than a statistically demonstrated optimum. Because Eq.~\eqref{eq:sad} separately averages the labelled term within batches and omits it when no labels are present, a budget sweep changes both information and optimization dynamics. Controlled resampling and matched gradient exposure would be needed to separate these effects.
 
+A descriptive way to summarize label efficiency is the fraction of the AUC gap from Isolation Forest to the fully supervised reference that the SAD headline closes:
+\begin{equation}\label{eq:gapfraction}
+ G_{\AUC}={\overline{\AUC}_{\mathrm{SAD}}-\overline{\AUC}_{\mathrm{IF}}\over
+ \overline{\AUC}_{\mathrm{sup}}-\overline{\AUC}_{\mathrm{IF}}}=0.510.
+\end{equation}
+The current five-seed means therefore close approximately 51\% of this descriptive gap, rather than the approximately 80\% inferred from the historical draft. $G_{\AUC}$ is dimensionless and benchmark-dependent; it is neither a fraction of discoverable signals nor an efficiency per labelled event. It also inherits the preprocessing and validation differences of the supervised reference. No uncertainty interval for this ratio or universal label-budget optimum is claimed.
+
 \subsection{Transfer and mass dependence}
 The mean AUC falls by 0.1210 for the autoencoder, 0.1237 for Isolation Forest, and 0.1388 for Deep SAD when transferring from two-prong to three-prong signal. The fully supervised reference loses 0.0367. SVDD and the mass-aware variant instead increase to 0.6170 and 0.6670, respectively, from poor nominal rankings. These signed differences demonstrate topology dependence of the scores; an increase from a near-chance nominal result should not be presented as general-purpose anomaly sensitivity.
 
@@ -206,6 +254,29 @@ The mean AUC falls by 0.1210 for the autoencoder, 0.1237 for Isolation Forest, a
 \end{figure*}
 
 Excluding $\mjj$ does not make a detector mass-independent: jet masses and substructure can be correlated with the event mass. The mean 10\% mass JSD is 0.0287 for Isolation Forest, 0.0066 for the Deep SAD headline, and 0.0082 for the supervised reference. The SVDD value 0.0012 accompanies near-chance nominal discrimination. Thus a small mass-histogram change is insufficient as a success criterion. Explicit mass inclusion in the specified SVDD reference yields JSD 0.0262 and nominal AUC 0.5151, without improving the nominal task.
+
+The original study's mass diagnostics are retained in Fig.~\ref{fig:massprofiles}. Each frozen seed-42 panel compares inclusive and selected background mass spectra, mass-dependent background acceptance, and the score as a function of mass. These views complement the scalar JSD summary: a stable global histogram can conceal a narrow localized distortion, and a smooth change in acceptance can still alter the fitted sidebands. Features in a background-only spectrum cannot be explained by the injected signal, which is absent from that spectrum.
+
+\begin{table*}[tbp]
+\caption{Additional headline operating-point diagnostics, averaged over seeds 42--46. $R_a$ denotes background rejection at signal efficiency $a$\%; $\mathrm{SIC}_{\max}$ is the maximum finite-test significance-improvement characteristic. JSD$_{1\%}$ uses the frozen validation-background operating point, and $\rho$ is background score--mass Pearson correlation. These descriptive means have no claimed confidence intervals; the seed-42 maxima and test-ROC thresholds are not prospectively selected search cuts.}\label{tab:operating}
+\begin{ruledtabular}\begin{tabular}{lrrrrrr}
+Detector & $R_{10}$ & $R_{30}$ & $R_{50}$ & $\mathrm{SIC}_{\max}$ & JSD$_{1\%}$ & $\rho$\\
+Autoencoder & 22.50 & 10.69 & 5.14 & 1.21 & 0.0292 & 0.0650\\
+Isolation Forest & 28.97 & 13.08 & 7.76 & 1.52 & 0.0793 & 0.2846\\
+Deep SVDD & 6.51 & 3.27 & 2.11 & 1.00 & 0.0082 & 0.0219\\
+Deep SAD & 452.75 & 119.92 & 43.47 & 3.40 & 0.0178 & 0.0419\\
+Supervised & 39330.19 & 2189.60 & 402.01 & 25.13 & 0.0123 & 0.0157\\
+Mass-aware SVDD & 7.64 & 3.46 & 2.19 & 1.00 & 0.1087 & 0.0705\\
+\end{tabular}\end{ruledtabular}
+\end{table*}
+
+Table~\ref{tab:operating} restores the original draft's distinction between a global ranking and a useful operating point. Ratios at small background rates can be sensitive to finite samples, and maximizing SIC on the test ROC is descriptive optimization over that sample. The table therefore complements the AUC uncertainty analysis rather than substituting for it or assigning discovery meaning to an ROC maximum.
+
+\begin{figure*}[tbp]
+\includegraphics[width=0.95\textwidth]{M4_DeepSAD_f0.5_k100_42_mass_diagnostics.png}\\[3pt]
+\includegraphics[width=0.95\textwidth]{M5_Supervised_f0_k1000_42_mass_diagnostics.png}
+\caption{Background-only mass diagnostics for the Deep SAD headline (top) and supervised reference (bottom), seed 42. Within each row, the panels show mass distributions, bin-dependent acceptance, and score--mass dependence for the saved operating-point diagnostics. These plots are not signal-injection discovery tests.}\label{fig:massprofiles}
+\end{figure*}
 
 The sideband statistic can rise substantially after a cut. For example, at seed 42 the Deep SAD diagnostic gives $Z=5.89$ and $7.58$ at the 10\% and 1\% background operating points. The corresponding supervised values are $6.63$ and $13.69$. Table~\ref{tab:z} reports all five reference seeds, including the failed Deep SAD 1\% fit at seed 44. Omitting a failed fit from an average or a null distribution changes the estimand; these outputs cannot establish a reliable significance gain.
 
@@ -222,6 +293,8 @@ Semi-supervised permutation-invariant collider detectors already exist \cite{ant
 \subsection{Density proxies and calibration}
 The archived ``ANODE''-named configuration is a five-component Gaussian mixture fitted to background sidebands, with negative log background density as its score. It does not estimate the signal-region data density, form an ANODE likelihood ratio, or implement mass-conditional interpolation. Likewise the ``CATHODE''-named conditional variational-autoencoder extension is a generated-reference classifier proxy, rather than the published conditional-flow construction \cite{anode,cathode}. Their observed AUCs, approximately 0.720 and 0.481, cannot be used to infer the performance of the original methods.
 
+The archived region MLP and region-tree classifiers give nominal AUCs of approximately 0.605 and 0.575. Both classifier implementations use only the first five feature columns at prediction time; $\mjj$ defines their training-region labels rather than entering their predictor directly. Their archived $f=0$ settings contain background only during training, so a signal-enriched training mixture is not present. They can learn background differences between regions without thereby learning the nominal signal. Their ranking is an observation about these settings, not evidence against weakly supervised mixture classification \cite{cwola}.
+
 For the frozen mixture score, the held-out sideband pool contains 128,112 events, split equally into calibration and evaluation sets using seed 2026. The conformal tail value is
 \begin{equation}\label{eq:conformal}
  p(x)={1+\sum_{i=1}^{n_{\mathrm{cal}}}\mathbf1[s_i\geq s(x)]\over n_{\mathrm{cal}}+1}.
@@ -230,6 +303,21 @@ Under exchangeability of calibration and future background scores and a fixed sc
 
 \section{Discussion and limitations}
 The strongest supported empirical conclusion is that a modest set of known anomalies improves the specified hypersphere detector's nominal ranking in this benchmark, while sensitivity to a changed topology and mass distortion remain separate concerns. That conclusion is consistent with the existing purpose of Deep SAD \cite{sad}; it establishes an implementation-specific measurement, not a new learning principle. The negative SVDD and particle-level results are reproducible observations with unresolved causes.
+
+\subsection{Practical interpretation of the four questions}
+The contamination sweep gives Isolation Forest the most stable nominal ranking among the three learned unsupervised implementations tested at seed 42, while the autoencoder's seed dispersion cautions against interpreting a single fit. Limited supervision raises the SAD ranking, but its approximately 51\% gap closure and the changed topology distinguish useful label guidance from an approximation to a universal signal model. The mass comparison identifies a second requirement: a ranking improvement must be assessed alongside how the selection changes the background that a resonance search will fit. Finally, the held-out three-prong pool measures one concrete transfer task, rather than broad model independence.
+
+These observations support a joint reporting standard: identify the supervision resource, give the contamination convention and seeds, report the nominal and transferred rankings, and show background-shape diagnostics at validation-defined thresholds. A detector with a slightly lower global AUC may be preferable for a particular search if its relevant operating point and background model are better controlled; the present study does not supply the full likelihood and systematic uncertainties needed to make that deployment choice. Likewise, removing a mass input or adding a decorrelation penalty is a design constraint, not a certificate of valid inference \cite{disco}.
+
+\subsection{Failure diagnostics and label bookkeeping}
+The original draft correctly emphasized that implementation failures can resemble physical conclusions. The current evidence establishes near-chance nominal SVDD ranking, but does not justify the stronger historical claim that center, activation, bias, and depth ablations demonstrated a universal collapse mechanism. Appendix~\ref{app:diagnostics} gives a restricted linear example to clarify what a constant-score limit would imply and why it does not diagnose the actual nonlinear model. Latent variance, score variance, gradient norms, and comparisons with pretrained embeddings would be needed to connect that example to the observed runs.
+
+For Deep SAD, unlabelled contamination and known anomalies must remain separate. If every injected signal were accidentally labelled, a nominal contamination sweep would simultaneously increase supervision and change its scientific meaning. In the released implementation only the designated $k$ events enter the anomalous-label term; injected but unlabelled events enter the reference term. Event-index disjointness and label-isolation checks are therefore part of the evidence, rather than optional bookkeeping. Historical performance differences cannot be assigned to that possible failure mode without a run-specific provenance comparison.
+
+\subsection{Mass-decorrelated and extended-feature research directions}
+The original MD-SWAD idea is retained as a concrete candidate in Appendix~\ref{app:mdswad}. Matching a spread-out reference distribution and penalizing mass dependence targets limitations different from those of a point-centered hypersphere. However, the previous draft's M9/M10 AUC and mass-decorrelation numbers do not have matching validated evaluation tables in the current release; they are not restored as experimental findings. The sliced-Wasserstein and distance-correlation ingredients already have prior art \cite{sliced,disco}. The scientific question is whether their particular combination gives a reproducible advantage under a matched collider protocol, not whether its name alone establishes novelty.
+
+The seven-feature extension similarly preserves a useful hypothesis from the draft: $\tau_{32}=\tau_3/\tau_2$ can expose substructure information beyond $\tau_{21}$ \cite{tau}. Its ability to improve the held-out ranking depends on the signal/background distributions, the reference training objective, and consistent feature extraction. The inequality $\tau_{32}<1$ alone is not a discriminating rule against QCD. Appendix~\ref{app:extended} states the corrected column schema and the validation needed before an improvement claim.
 
 Several limitations constrain generalization. First, the same fixed simulated test events are used across seeds and configurations. The bootstrap intervals quantify sampling uncertainty conditional on these distributions, not detector response, hadronization, or unseen resonance masses. Second, only six configurations have five-seed coverage, and no prospective hyperparameter selection or independent final holdout is claimed. Third, the supervised scaler and validation objective differ from those of the other models, while label exposure in Deep SAD changes with minibatch composition. Fourth, a physics-motivated cut and faithful modern density/particle baselines require matched-protocol comparisons before a claim of competitive novelty.
 
@@ -275,6 +363,51 @@ The final core used an isolated Python 3.11.9 environment on Windows, with NumPy
 
 Thirty repository tests passed in the release verification. These include split/scaler isolation, labelled/unlabelled disjointness, threshold ties, and AUC bootstrap consistency; software tests do not establish physics validity. The accompanying data audit derives the manuscript's numerical tables from the canonical results without fitting new models. An independent cross-machine reproduction and human scientific review remain outstanding.
 
+\section{An illustrative constant-score limit}\label{app:diagnostics}
+Consider the restricted linear embedding $\phi_W(x)=Wx$ with fixed center $c$, no bias, finite second moments, and an exactly centered training reference $\mu=\mathbb E[x]=0$. Writing $\Sigma=\mathbb E[xx^T]$, its squared-distance objective is
+\begin{align}
+ L(W)&=\mathbb E\|Wx-c\|^2\\
+ &=\operatorname{tr}(W\Sigma W^T)-2c^TW\mu+\|c\|^2,\\
+ \nabla_W L&=2W\Sigma-2c\mu^T.
+\end{align}
+At $\mu=0$, $W=0$ is stationary and minimizes this linear objective; if $\Sigma$ is positive definite, it is the unique minimum. The score then becomes $s(x)=\|c\|^2$ for every event, giving AUC $1/2$ under half-credit tie handling. All terms are dimensionless for standardized inputs, and the $c=0$ limit gives the expected zero score.
+
+This calculation illustrates a failure mode of a linear point-concentration objective, consistent with the motivation for architectural restrictions in Deep SVDD \cite{svdd}. It is not a derivation for the trained multilayer ReLU network: centering $x$ does not imply centering $\phi_\theta(x)$ or the parameter Jacobian, and the center in this project is initialized from embeddings rather than set identically to $0.1\mathbf1$. Near-chance AUC can also occur with varying scores that fail to separate the evaluated classes. Diagnosing collapse requires inspecting the learned representation rather than inferring it from AUC alone.
+
+\section{Mass-decorrelated sliced-Wasserstein candidate}\label{app:mdswad}
+Let $z_i=\phi_\theta(x_i)\in\mathbb R^{16}$ denote an embedding of an unlabelled batch of size $n$. Draw $n$ reference vectors $\xi_i\sim\mathcal N(0,I)$ and $K=50$ random unit directions $u_k$. The implemented empirical sliced squared-Wasserstein term is
+\begin{equation}
+ \widehat{\mathrm{SW}}_2^2={1\over Kn}\sum_{k=1}^K\sum_{i=1}^n
+ \left[(u_k^Tz)_{(i)}-(u_k^T\xi)_{(i)}\right]^2,
+\end{equation}
+where $(i)$ denotes the sorted projected sample, not an event pairing. The construction follows the established use of one-dimensional transport along random projections \cite{sliced}. Reference vectors and projections are resampled in the implementation.
+
+The candidate training loss is
+\begin{equation}\label{eq:mdswad}
+ L_{\mathrm{MD}}=\widehat{\mathrm{SW}}_2^2+
+ \lambda\,\widehat{\mathrm{dCor}}(z,\mjj).
+\end{equation}
+The repository uses distance correlation itself, whereas the original draft wrote its square. Distance correlation is computed from doubly centered pairwise distance matrices and is dimensionless; the standard-normal latent coordinates make the transport term dimensionless as well. The mass variable enters the regularizer, not the anomaly-score input. Using finite-batch penalties does not demonstrate population independence \cite{disco}. Unlike the core bias-free SVDD backbone, this candidate's linear layers have biases.
+
+For the labelled-anomaly variant, the implementation adds
+\begin{equation}
+ {\eta\over k}\sum_{j\in A}{1\over\|\phi_\theta(x_j)\|^2+10^{-6}},
+ \qquad \eta=1,
+\end{equation}
+and evaluates the entire designated label pool at each unlabelled update. This exposure differs from the sparse mixed-batch Deep SAD schedule, so a direct label-efficiency comparison must account for it. The anomaly score is $\|z\|^2$, which would be monotonic in negative log density for an exactly standard-normal embedding. Neither exact distribution matching nor a calibrated Gaussian tail has been established for the trained candidate.
+
+Equations above document an implemented research direction, not a validated solution to collapse or mass sculpting. Required tests include transport-only and decorrelation-only ablations, a prospectively selected $\lambda$, matched label exposure, repeated seeds, and background-only search calibration. The candidate's historical numerical table is withheld until checkpoint, feature schema, and evaluation provenance match.
+
+\section{Extended subjettiness representation}\label{app:extended}
+The corrected extended cache has schema version 2.0.0 and ordered columns
+\begin{align*}
+ (&m_{J_1},|\Delta m_J|,\tau_{21}^{J_1},\tau_{21}^{J_2},\Delta R_{JJ},\\
+  &\tau_{32}^{J_1},\tau_{32}^{J_2},\mjj,y).
+\end{align*}
+Its first five columns preserve the canonical input ordering. A previous cache placed $\Delta R_{JJ}$ after the additional ratios, so reusing positional slices could silently change the detector's inputs. Schema and column checks prevent that mismatch; they do not establish improved discrimination. Finite, well-defined ratios and identical event selections must also be enforced before comparing a seven-feature fit with its five-feature reference.
+
+The feature extension is motivated by the three-prong evaluation and established subjettiness observables \cite{tau}, but no validated repeated-seed result is used here to claim a gain. A suitable comparison would hold the split, training information, score orientation, and model-selection protocol fixed, then assess the new topology alongside the nominal task and mass diagnostics. The raw-particle exploratory results use a different representation and therefore do not serve as that ablation.
+
 \begin{thebibliography}{99}
 \bibitem{lhco} G. Kasieczka \textit{et al.}, The LHC Olympics 2020: A community challenge for anomaly detection in high energy physics, Rep. Prog. Phys. \textbf{84}, 124201 (2021), \href{https://doi.org/10.1088/1361-6633/ac36b9}{doi:10.1088/1361-6633/ac36b9}, arXiv:2101.08320.
 \bibitem{dataset} G. Kasieczka, B. Nachman, and D. Shih, LHC Olympics 2020 R\&D Dataset, Zenodo (2019; version 5, 2022), \href{https://doi.org/10.5281/zenodo.6466204}{doi:10.5281/zenodo.6466204}.
@@ -292,5 +425,9 @@ Thirty repository tests passed in the release verification. These include split/
 \bibitem{external} R. Das \textit{et al.}, Additional signal models for the LHCO2020 R\&D, Zenodo (2026), \href{https://doi.org/10.5281/zenodo.18983506}{doi:10.5281/zenodo.18983506}.
 \bibitem{conformal} G. Shafer and V. Vovk, A tutorial on conformal prediction, J. Mach. Learn. Res. \textbf{9}, 371 (2008), \href{https://arxiv.org/abs/0706.3188}{arXiv:0706.3188}.
 \bibitem{araz} J. Y. Araz and M. Spannowsky, Conformal calibration and look-elsewhere effect in anomaly detection for new-physics searches, \href{https://arxiv.org/abs/2606.13780}{arXiv:2606.13780} (2026), preprint.
+\bibitem{atlas} G. Aad \textit{et al.} (ATLAS Collaboration), Dijet resonance search with weak supervision using $\sqrt{s}=13$ TeV collisions in the ATLAS detector, Phys. Rev. Lett. \textbf{125}, 131801 (2020), \href{https://doi.org/10.1103/PhysRevLett.125.131801}{doi:10.1103/PhysRevLett.125.131801}.
+\bibitem{cms} V. Chekhovsky \textit{et al.} (CMS Collaboration), Model-agnostic search for dijet resonances with anomalous jet substructure in proton--proton collisions at $\sqrt{s}=13$ TeV, Rep. Prog. Phys. \textbf{88}, 067802 (2025), \href{https://doi.org/10.1088/1361-6633/add762}{doi:10.1088/1361-6633/add762}, arXiv:2412.03747.
+\bibitem{disco} G. Kasieczka and D. Shih, DisCo Fever: Robust networks through distance correlation, Phys. Rev. Lett. \textbf{125}, 122001 (2020), \href{https://doi.org/10.1103/PhysRevLett.125.122001}{doi:10.1103/PhysRevLett.125.122001}, arXiv:2001.05310.
+\bibitem{sliced} N. Bonneel, J. Rabin, G. Peyr\'e, and H. Pfister, Sliced and Radon Wasserstein barycenters of measures, J. Math. Imaging Vis. \textbf{51}, 22--45 (2015), \href{https://doi.org/10.1007/s10851-014-0506-3}{doi:10.1007/s10851-014-0506-3}.
 \end{thebibliography}
 \end{document}

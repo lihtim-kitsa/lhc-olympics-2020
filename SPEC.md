@@ -1,5 +1,11 @@
 # Release completion
 
+## Expand the original draft in the open manuscript (2026-10-03)
+- Goal: build on the user's supplied original draft rather than replace its research story; revise `reports/lhco2020_pra.tex` in place and retain APS/PRA formatting.
+- Scope: restore the original title, four questions, model/feature overview, practical interpretation, failure diagnostics, and MD-SWAD/extended-feature ideas with accurate evidence status; retain released numbers and correct unsupported historical claims.
+- Files: existing open LaTeX source and documentation of this revision; do not create a replacement source, a separately compiled PDF, or another editor tab.
+- Acceptance: every new result traces to existing artifacts; theoretical ingredients cite primary sources; explicitly distinguish candidate methods from validated results; call the built-in compiler and report infrastructure limitations honestly.
+
 ## Academic manuscript and novelty assessment (2026-10-03)
 - Goal: write a complete research manuscript about the released benchmark in Physical Review A REVTeX format and assess novelty, validity and journal fit against primary literature.
 - Files: new `reports/lhco2020_pra.tex`, `reports/novelty_and_journal_assessment.md`, `reports/pra_data_audit.json`, verification notes, and a visually verified manuscript PDF under `reports/final/`; preserve existing reports, numerical results and release tags.

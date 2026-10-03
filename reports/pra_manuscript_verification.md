@@ -1,5 +1,15 @@
 # APS/PRA-format manuscript verification
 
+## In-place expansion of the user's original draft
+
+The open `lhco2020_pra.tex` was subsequently expanded on 3 October 2026 from the user's pasted original draft. Its original title, four research questions, M0–M12 overview, feature table, operating-point diagnostics, background mass panels, failure-analysis emphasis, and MD-SWAD/extended-feature ideas are now retained in the existing source. Historical performance claims were replaced by the released measurements or clearly marked as unvalidated candidates. The descriptive AUC-gap closure is 0.510356 (approximately 51%), rather than the draft's historical 80%.
+
+New numerical rows were calculated directly from the canonical five-seed groups in `tables/results.csv`. Static checks verified all 20 citation keys, 21 unique labels and their cross-references, nested LaTeX environments, and absence of table-template markers. Candidate-method formulas were checked against `src/models/m9_md_swad.py` and `scripts/train_md_swad.py`: the code uses unsquared distance correlation and evaluates the full labelled pool per update. The linear constant-score derivation is explicitly restricted and is not asserted as a diagnosis of the nonlinear SVDD runs.
+
+The built-in compiler still returns `Unable to find standard directories for platform`. Under the user's instruction to keep this editor/file and avoid a separately compiled PDF, no shell PDF compilation or new tab was used for the revision. **The expanded source's compiled preview and layout are unverified. The existing nine-page PDF is the earlier version**, with the hash and initial verification record below. The numerical/model artifacts were not modified.
+
+## Initial nine-page build record
+
 Verified on 3 October 2026 against numerical release v1.0.1, commit `4b15306cfac9e3f57ace098932db0e4ea69e0f2a`. This manuscript is a subsequent documentation artifact and does not change the frozen numerical release.
 
 ## Delivered files
