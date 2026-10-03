@@ -21,4 +21,5 @@ Close the release-tooling gaps without changing the frozen physics protocol or e
 - Correct summary seed coverage, resume metadata and percentage labels; retain extended technical-note content.
 - Validate manuscript tables/figures against saved results, compile and visually inspect the PDF.
 - Verify in an isolated dependency environment; record environment, wall time, disk use and limitations.
+- Report stratified paired-bootstrap AUC intervals on frozen seed-42 test events separately from training-seed variance; validate weighted tie handling against analytic and sklearn cases.
 - Commit the final source/results, confirm the public remote, and tag/publish v1.0 only when acceptance passes.
