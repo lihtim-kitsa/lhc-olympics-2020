@@ -13,6 +13,7 @@ import os
 import sys
 
 import h5py
+import hdf5plugin  # noqa: F401; registers the raw files' Blosc compression filter
 import numpy as np
 import pandas as pd
 from tqdm import tqdm

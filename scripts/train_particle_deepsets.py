@@ -15,6 +15,7 @@ import os
 import sys
 
 import h5py
+import hdf5plugin  # noqa: F401; registers Blosc filters for the official raw files
 import numpy as np
 import pandas as pd
 import torch

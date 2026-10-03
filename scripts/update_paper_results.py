@@ -161,7 +161,7 @@ def refresh():
     text = text.replace("mean $\\pm$ std over seeds 42--44", "seed 42")
     text = text.replace("mean $\\pm$ s.d. over seeds 42--44", "five seeds 42--46")
     # The contamination figure is the full single-seed sweep, not a five-seed mean.
-    text = text.replace("detectors (five seeds 42--46).", "detectors (seed 42).")
+    text = text.replace("models (five seeds 42--46).", "models (seed 42).")
     text = text.replace(
         "with the lowest validation objective is selected. Three seeds\n"
         "(42, 43 and 44) are used for all headline comparisons.",
