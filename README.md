@@ -28,6 +28,8 @@ The final core results come from 47 fresh-checkout fits in an isolated Python 3.
 
 Final PDFs: [project report](reports/final/LHC_Olympics_Project_Report.pdf) and [manuscript](reports/final/lhco2020_paper.pdf). Paired finite-test AUC intervals are in `reports/tables/auc_bootstrap.json`; historical results and clean-run evidence are retained under `reports/reproduction/`.
 
+The subsequent [APS/PRA-format research paper](reports/final/lhco2020_pra.pdf) has an [editable REVTeX source](reports/lhco2020_pra.tex), [numerical audit](reports/pra_data_audit.json), and [novelty/journal-readiness assessment](reports/novelty_and_journal_assessment.md). The format does not imply PRA scope suitability; the assessment documents incremental novelty and outstanding scientific-validation requirements.
+
 ## Reproduce
 
 Use Python 3.11 or 3.13 and install the project dependencies (the final core reproduction used Python 3.11; the Dockerfile uses Python 3.11):
