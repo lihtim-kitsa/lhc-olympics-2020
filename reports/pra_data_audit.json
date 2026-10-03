@@ -1,0 +1,413 @@
+{
+  "release": "v1.0.1",
+  "date": "2026-10-03",
+  "headlines": [
+    {
+      "model": "M1_Autoencoder",
+      "fraction_percent": 0,
+      "labels_metadata": 0,
+      "roc_auc": {
+        "mean": 0.7175271220387369,
+        "sd": 0.07407385085631989
+      },
+      "roc_auc_3prong": {
+        "mean": 0.5965357381328691,
+        "sd": 0.1026391182951579
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.01684141247367428,
+        "sd": 0.006997496114893142
+      },
+      "score_mjj_dependence": {
+        "mean": 0.06500757736801233,
+        "sd": 0.023083724801194538
+      },
+      "max_sic": {
+        "mean": 1.2072553161339616,
+        "sd": 0.1907264595576005
+      },
+      "rej_10": {
+        "mean": 22.495974164039595,
+        "sd": 5.932574460014128
+      },
+      "transfer_gap": -0.12099138390586779,
+      "seed42_bootstrap": {
+        "auc": 0.7943987210565162,
+        "ci95": [
+          0.7910724570589422,
+          0.7976011965046521
+        ]
+      }
+    },
+    {
+      "model": "M2_IsolationForest",
+      "fraction_percent": 0,
+      "labels_metadata": 0,
+      "roc_auc": {
+        "mean": 0.8068050687353647,
+        "sd": 0.007745746465868701
+      },
+      "roc_auc_3prong": {
+        "mean": 0.6831078136963635,
+        "sd": 0.02058923875386635
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.028722019580788783,
+        "sd": 0.0033161749100755747
+      },
+      "score_mjj_dependence": {
+        "mean": 0.284622322126818,
+        "sd": 0.011424899727186483
+      },
+      "max_sic": {
+        "mean": 1.5214733041830883,
+        "sd": 0.055344814443730454
+      },
+      "rej_10": {
+        "mean": 28.967462044333207,
+        "sd": 3.044694576981733
+      },
+      "transfer_gap": -0.12369725503900134,
+      "seed42_bootstrap": {
+        "auc": 0.8165353815922798,
+        "ci95": [
+          0.8136660084418326,
+          0.8193713204535359
+        ]
+      }
+    },
+    {
+      "model": "M3_DeepSVDD",
+      "fraction_percent": 0,
+      "labels_metadata": 0,
+      "roc_auc": {
+        "mean": 0.5002035317856435,
+        "sd": 0.007211290660733449
+      },
+      "roc_auc_3prong": {
+        "mean": 0.6169693166501082,
+        "sd": 0.011431544669913415
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.00115537588539596,
+        "sd": 7.397196186114543e-05
+      },
+      "score_mjj_dependence": {
+        "mean": 0.02191423788404438,
+        "sd": 0.005049287965208822
+      },
+      "max_sic": {
+        "mean": 1.0000385946826646,
+        "sd": 3.0614112955887504e-05
+      },
+      "rej_10": {
+        "mean": 6.514125231456124,
+        "sd": 0.4436564872155366
+      },
+      "transfer_gap": 0.1167657848644648,
+      "seed42_bootstrap": {
+        "auc": 0.512286268458588,
+        "ci95": [
+          0.5084365535187504,
+          0.5161414787839208
+        ]
+      }
+    },
+    {
+      "model": "M4_DeepSAD",
+      "fraction_percent": 0.5,
+      "labels_metadata": 100,
+      "roc_auc": {
+        "mean": 0.8880198098884519,
+        "sd": 0.011388086658030802
+      },
+      "roc_auc_3prong": {
+        "mean": 0.7492152196681862,
+        "sd": 0.061403078071998074
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.006627964239879941,
+        "sd": 0.0028446056539789665
+      },
+      "score_mjj_dependence": {
+        "mean": 0.04191075883154825,
+        "sd": 0.022348244573033894
+      },
+      "max_sic": {
+        "mean": 3.401739443929268,
+        "sd": 0.43262865275806944
+      },
+      "rej_10": {
+        "mean": 452.7473511664824,
+        "sd": 225.24917075980434
+      },
+      "transfer_gap": -0.13880459022026567,
+      "seed42_bootstrap": {
+        "auc": 0.8761809568990364,
+        "ci95": [
+          0.873460598273397,
+          0.8787495965114047
+        ]
+      }
+    },
+    {
+      "model": "M5_Supervised",
+      "fraction_percent": 0,
+      "labels_metadata": 1000,
+      "roc_auc": {
+        "mean": 0.9659386370133456,
+        "sd": 0.00023213993607316152
+      },
+      "roc_auc_3prong": {
+        "mean": 0.9291589055506536,
+        "sd": 0.001206458575053296
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.008185625966085441,
+        "sd": 0.0008316651947845964
+      },
+      "score_mjj_dependence": {
+        "mean": 0.01571071902843512,
+        "sd": 0.004315186080684057
+      },
+      "max_sic": {
+        "mean": 25.12809736170591,
+        "sd": 2.962979795763557
+      },
+      "rej_10": {
+        "mean": 39330.18666666667,
+        "sd": 6830.754006598882
+      },
+      "transfer_gap": -0.036779731462691846,
+      "seed42_bootstrap": {
+        "auc": 0.9659333636368845,
+        "ci95": [
+          0.964557441328778,
+          0.9672567767651358
+        ]
+      }
+    },
+    {
+      "model": "M6_MassAware",
+      "fraction_percent": 0,
+      "labels_metadata": 0,
+      "roc_auc": {
+        "mean": 0.5151241513703972,
+        "sd": 0.01047141118754397
+      },
+      "roc_auc_3prong": {
+        "mean": 0.6669925997530666,
+        "sd": 0.023307678265014075
+      },
+      "mass_sculpting_jsd_at_10pct_bkg": {
+        "mean": 0.02622510451956398,
+        "sd": 0.0006949088072240705
+      },
+      "score_mjj_dependence": {
+        "mean": 0.07052919879322234,
+        "sd": 0.002951788851770496
+      },
+      "max_sic": {
+        "mean": 1.0000520321285191,
+        "sd": 9.834255701387643e-05
+      },
+      "rej_10": {
+        "mean": 7.6357349656382265,
+        "sd": 0.4542274028364755
+      },
+      "transfer_gap": 0.1518684483826692,
+      "seed42_bootstrap": {
+        "auc": 0.5278034497710806,
+        "ci95": [
+          0.5239076609312882,
+          0.5314474261324083
+        ]
+      }
+    }
+  ],
+  "parameter_counts": {
+    "Autoencoder": 5973,
+    "SVDD/SAD": 2880,
+    "Supervised": 2497,
+    "Mass-aware": 2944
+  },
+  "paired_comparisons": {
+    "M2_IsolationForest minus M4_DeepSAD": {
+      "difference": -0.059645575306756626,
+      "ci95": [
+        -0.06251653839923718,
+        -0.05695771484570831
+      ]
+    },
+    "M4_DeepSAD minus M5_Supervised": {
+      "difference": -0.08975240673784812,
+      "ci95": [
+        -0.09238840749463398,
+        -0.0874038805224592
+      ]
+    }
+  },
+  "single_seed_grid": [
+    {
+      "model": "M1_Autoencoder",
+      "f_train": 0.0,
+      "k_labels": 0,
+      "roc_auc": 0.7943987210565162,
+      "roc_auc_3prong": 0.7590504858043058
+    },
+    {
+      "model": "M1_Autoencoder",
+      "f_train": 0.1,
+      "k_labels": 0,
+      "roc_auc": 0.7034652667692511,
+      "roc_auc_3prong": 0.6699278752752833
+    },
+    {
+      "model": "M1_Autoencoder",
+      "f_train": 0.5,
+      "k_labels": 0,
+      "roc_auc": 0.716002623528546,
+      "roc_auc_3prong": 0.5498087033009152
+    },
+    {
+      "model": "M1_Autoencoder",
+      "f_train": 1.0,
+      "k_labels": 0,
+      "roc_auc": 0.7239694738691718,
+      "roc_auc_3prong": 0.6439629737520788
+    },
+    {
+      "model": "M2_IsolationForest",
+      "f_train": 0.0,
+      "k_labels": 0,
+      "roc_auc": 0.8165353815922798,
+      "roc_auc_3prong": 0.7144324509701712
+    },
+    {
+      "model": "M2_IsolationForest",
+      "f_train": 0.1,
+      "k_labels": 0,
+      "roc_auc": 0.8171825187803382,
+      "roc_auc_3prong": 0.7160116178386544
+    },
+    {
+      "model": "M2_IsolationForest",
+      "f_train": 0.5,
+      "k_labels": 0,
+      "roc_auc": 0.8178727607870561,
+      "roc_auc_3prong": 0.7177434112208347
+    },
+    {
+      "model": "M2_IsolationForest",
+      "f_train": 1.0,
+      "k_labels": 0,
+      "roc_auc": 0.813627740749366,
+      "roc_auc_3prong": 0.7156709684811794
+    },
+    {
+      "model": "M3_DeepSVDD",
+      "f_train": 0.0,
+      "k_labels": 0,
+      "roc_auc": 0.512286268458588,
+      "roc_auc_3prong": 0.6364827790624351
+    },
+    {
+      "model": "M3_DeepSVDD",
+      "f_train": 0.1,
+      "k_labels": 0,
+      "roc_auc": 0.4865618421558141,
+      "roc_auc_3prong": 0.619797308215765
+    },
+    {
+      "model": "M3_DeepSVDD",
+      "f_train": 0.5,
+      "k_labels": 0,
+      "roc_auc": 0.4789684636313213,
+      "roc_auc_3prong": 0.6192663558871156
+    },
+    {
+      "model": "M3_DeepSVDD",
+      "f_train": 1.0,
+      "k_labels": 0,
+      "roc_auc": 0.443927753668183,
+      "roc_auc_3prong": 0.6175187835732034
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.0,
+      "k_labels": 10,
+      "roc_auc": 0.7610787266161929,
+      "roc_auc_3prong": 0.5804703296493777
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.0,
+      "k_labels": 100,
+      "roc_auc": 0.8945595341065974,
+      "roc_auc_3prong": 0.7593133116315722
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.0,
+      "k_labels": 1000,
+      "roc_auc": 0.9282062785316886,
+      "roc_auc_3prong": 0.7723452878730924
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.5,
+      "k_labels": 10,
+      "roc_auc": 0.8451888513553578,
+      "roc_auc_3prong": 0.6821771260830649
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.5,
+      "k_labels": 100,
+      "roc_auc": 0.8761809568990364,
+      "roc_auc_3prong": 0.6503699521768194
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 0.5,
+      "k_labels": 1000,
+      "roc_auc": 0.9316241912425608,
+      "roc_auc_3prong": 0.821868617531413
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 1.0,
+      "k_labels": 10,
+      "roc_auc": 0.7695150904130742,
+      "roc_auc_3prong": 0.6152629120307118
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 1.0,
+      "k_labels": 100,
+      "roc_auc": 0.889215152390227,
+      "roc_auc_3prong": 0.7060913914623548
+    },
+    {
+      "model": "M4_DeepSAD",
+      "f_train": 1.0,
+      "k_labels": 1000,
+      "roc_auc": 0.9258016097629078,
+      "roc_auc_3prong": 0.7537877299001123
+    },
+    {
+      "model": "M5_Supervised",
+      "f_train": 0.0,
+      "k_labels": 1000,
+      "roc_auc": 0.9659333636368844,
+      "roc_auc_3prong": 0.9274803638454618
+    },
+    {
+      "model": "M6_MassAware",
+      "f_train": 0.0,
+      "k_labels": 0,
+      "roc_auc": 0.5278034497710806,
+      "roc_auc_3prong": 0.6831537037841746
+    }
+  ]
+}

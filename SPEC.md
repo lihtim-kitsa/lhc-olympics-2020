@@ -1,5 +1,12 @@
 # Release completion
 
+## Academic manuscript and novelty assessment (2026-10-03)
+- Goal: write a complete research manuscript about the released benchmark in Physical Review A REVTeX format and assess novelty, validity and journal fit against primary literature.
+- Files: new `reports/lhco2020_pra.tex`, `reports/novelty_and_journal_assessment.md`, `reports/pra_data_audit.json`, verification notes, and a visually verified manuscript PDF under `reports/final/`; preserve existing reports, numerical results and release tags.
+- Scope: final core tables, statistical definitions, exploratory extensions, reproducibility and declared deviations; primary-source comparison limited to ten key works. No new experiments or invented quantum component.
+- Acceptance: numerical claims trace to released artifacts; distinguish seed variance from finite-test intervals; verify official APS scope/style; inspect methodological implementations; compile with resolved citations and inspect every page.
+- Delivery: editable LaTeX, compiled PDF and a candid submission-readiness verdict. Do not submit or alter public tags. Use the built-in editor/compiler where supported and preserve source on native compiler failure.
+
 ## Goal
 Close the release-tooling gaps without changing the frozen physics protocol or existing results.
 
