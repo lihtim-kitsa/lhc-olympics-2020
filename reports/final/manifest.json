@@ -1,5 +1,5 @@
 {
-  "release": "v1.0",
+  "release": "v1.0.1",
   "date": "2026-10-03",
   "files": {
     "reports/final/LHC_Olympics_Project_Report.pdf": {
@@ -11,20 +11,21 @@
       "sha256": "5f3444005aca33cfa832e128c4eef479c40be17b6df3947643c5bf1ebe8050f8"
     },
     "reports/tables/results.csv": {
-      "bytes": 44131,
-      "sha256": "c8a67a62092a7102923411aa780ea3e5c36c679f6f74263e542292d799bf24e0"
+      "bytes": 44078,
+      "sha256": "21e86b01342f28a2aaa5b9899ebcc292444053b677bbf35a8983f0a4334069e4"
     },
     "reports/tables/auc_bootstrap.json": {
-      "bytes": 4056,
-      "sha256": "99a0849c09c6556e0332cd11e500e1b5b212ab17124d782beb225b5106c2f797"
+      "bytes": 3896,
+      "sha256": "966643cec006663abdb08b1078b45405d18246b01f83efb37942a9d54c631a2b"
     },
     "reports/tables/frozen_test_scores.npz": {
       "bytes": 6421726,
       "sha256": "ff8267a400197b7747374c573b7b2112b6184441077732f9f98e02e60821b231"
     },
     "requirements-release-py311.txt": {
-      "bytes": 2518,
-      "sha256": "516dcdd3bf5f63a1bbef3bc6ff49e1f0e712ca3a86248dd7cd790e9f4fafcbad"
+      "bytes": 2381,
+      "sha256": "f7c5a796dd9c3efd9acfe1eb072606ffce3d4389a2db04e8499fe9f8c590689f"
     }
-  }
+  },
+  "checksum_scope": "Exact Git blob bytes in the release archive. Text files in a Windows checkout may have CRLF line endings; normalize to LF before checking their hashes."
 }

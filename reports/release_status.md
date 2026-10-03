@@ -1,4 +1,4 @@
-# v1.0 release acceptance — 3 October 2026
+# v1.0.1 release acceptance — 3 October 2026
 
 The benchmark release is complete within the declared simulation-only scope. This is author verification, not an external scientific review or a discovery claim.
 
@@ -54,3 +54,5 @@ python scripts/build_report.py
 ```
 
 For the pinned reference stack, install `requirements-release-py311.txt` in a Python 3.11 Windows environment before installing the editable project. Full reproduction requires approximately 3.2 GB of raw input plus output/environment storage. Release PDFs are under `reports/final/`.
+
+The v1.0.1 packaging patch records checksums for exact Git-archive bytes; v1.0 was preserved. Numerical results and PDFs are unchanged.
